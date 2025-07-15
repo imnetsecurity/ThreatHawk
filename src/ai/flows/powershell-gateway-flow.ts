@@ -5,20 +5,20 @@
  * @fileOverview Defines a Genkit flow for simulating PowerShell command execution.
  * 
  * - executePowerShellCommandFlow - A function that simulates running a PowerShell command.
- * - PowerShellInputSchema - The input type for the function.
- * - PowerShellOutputSchema - The return type for the function.
+ * - PowerShellInput - The input type for the function.
+ * - PowerShellOutput - The return type for the function.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const PowerShellInputSchema = z.object({
+const PowerShellInputSchema = z.object({
   command: z.string().describe('The PowerShell command to execute.'),
   hostname: z.string().describe('The hostname of the target machine, for context.'),
 });
 export type PowerShellInput = z.infer<typeof PowerShellInputSchema>;
 
-export const PowerShellOutputSchema = z.string().describe('The simulated output of the PowerShell command.');
+const PowerShellOutputSchema = z.string().describe('The simulated output of the PowerShell command.');
 export type PowerShellOutput = z.infer<typeof PowerShellOutputSchema>;
 
 
