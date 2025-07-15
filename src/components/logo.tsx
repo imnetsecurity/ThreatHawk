@@ -17,8 +17,9 @@ export const ThreatHawkLogo = React.forwardRef<
     className={cn("h-6 w-6", className)}
     {...props}
   >
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-    <path d="M12 10l-4 4 2 2 4-4-2-2z"></path>
+    <path d="M17.5 19H9.25a2 2 0 0 1-2-2.06v-3.87a2 2 0 0 1 .4-1.2L10 8" />
+    <path d="M12 2 4 6v6a8 8 0 0 0 16 0V6Z" />
+    <path d="m14 10 3 3" />
   </svg>
 ));
 ThreatHawkLogo.displayName = "ThreatHawkLogo";
