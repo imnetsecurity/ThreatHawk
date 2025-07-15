@@ -40,18 +40,44 @@ const prompt = ai.definePrompt({
   name: 'generateSysmonRuleFromTextPrompt',
   input: {schema: GenerateSysmonRuleFromTextInputSchema},
   output: {schema: GenerateSysmonRuleFromTextOutputSchema},
-  prompt: `You are an expert cybersecurity analyst specializing in Sysmon rule creation. Your task is to convert a user's plain English request into a well-formed Sysmon rule.
+  prompt: `You are a senior cybersecurity analyst and an expert in creating Sysmon configurations. Your task is to convert a user's plain English request into a highly specific and accurate Sysmon rule. You must follow Sysmon XML schema and best practices precisely.
 
-  The user's request is:
+  **User's Request:**
   "{{request}}"
 
-  Generate a single, complete Sysmon <Rule>...</Rule> block in XML format that can be added to a larger configuration. Do not include the parent <RuleGroup> or <Sysmon> tags.
+  **Your Task:**
 
-  The rule should be well-commented to explain its logic.
+  1.  **Deconstruct the Request:** Analyze the user's request to identify the core behavior to be detected. This includes processes, parent processes, command-line arguments, registry keys, network connections, file hashes, etc.
 
-  Also provide a brief explanation of how the generated rule fulfills the user's request.
+  2.  **Select the Correct Event:** Based on your analysis, choose the single most appropriate Sysmon event type to target. Here are some key events:
+      *   **Event ID 1: ProcessCreate:** Use for process execution events. Key fields: \`Image\`, \`CommandLine\`, \`ParentImage\`, \`Hashes\`.
+      *   **Event ID 3: NetworkConnect:** Use for network connections. Key fields: \`Image\`, \`DestinationIp\`, \`DestinationPort\`, \`Protocol\`.
+      *   **Event ID 11: FileCreate:** Use for file creation/write events. Key fields: \`TargetFilename\`, \`Image\`.
+      *   **Event ID 12, 13, 14: RegistryEvent:** Use for registry modifications. Key fields: \`EventType\` (CreateKey, SetValue), \`TargetObject\`.
+      *   **Event ID 22: DnsQuery:** Use for DNS lookups. Key fields: \`QueryName\`, \`Image\`.
 
-  Return the output as a valid JSON object.
+  3.  **Construct the Rule:**
+      *   Generate a single, complete \`<Rule>\` ... \`</Rule>\` block in XML format. **Do not** include the parent \`<RuleGroup>\` or \`<Sysmon>\` tags.
+      *   The rule must have \`groupRelation="or"\`.
+      *   The event block (e.g., \`<ProcessCreate\`) inside the rule must have \`onmatch="include"\`.
+      *   Use the correct XML field names for the chosen event type.
+      *   Use appropriate condition attributes (e.g., 'is', 'contains', 'begin with', 'end with'). Be as specific as possible.
+      *   Create a descriptive name for the rule in the 'name' attribute, like "technique_name, T1234.001".
+      *   Add an XML comment inside the rule to explain its logic in one sentence.
+
+  4.  **Provide an Explanation:** Write a brief, clear explanation of how the generated rule fulfills the user's request, mentioning the event ID you chose and why.
+
+  **Example Request:** "Detect when powershell.exe is launched by winword.exe"
+
+  **Example Output (as a valid JSON object):**
+  \`\`\`json
+  {
+    "ruleXml": "<Rule name=\\"technique_name, T1059.001\\" groupRelation=\\"or\\">\\n  <!-- Detects PowerShell being spawned by a Microsoft Office application. -->\\n  <ProcessCreate onmatch=\\"include\\">\\n    <ParentImage condition=\\"is\\">C:\\\\Program Files\\\\Microsoft Office\\\\root\\\\Office16\\\\WINWORD.EXE</ParentImage>\\n    <Image condition=\\"is\\">C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe</Image>\\n  </ProcessCreate>\\n</Rule>",
+    "explanation": "This rule uses Sysmon Event ID 1 (ProcessCreate) to detect when 'winword.exe' (ParentImage) launches 'powershell.exe' (Image). This is a common tactic for macro-based attacks."
+  }
+  \`\`\`
+  
+  Now, process the user's request.
   `,
 });
 
