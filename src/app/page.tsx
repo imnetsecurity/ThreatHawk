@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -33,6 +34,7 @@ import {
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis } from "recharts";
 import { recentAlerts, timelineData } from "@/lib/mock-data";
 import { Alert } from "@/lib/types";
+import { useRouter } from "next/navigation";
 
 const chartConfig = {
   informational: {
@@ -50,6 +52,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function DashboardPage() {
+  const router = useRouter();
   const getBadgeVariant = (
     severity: "Critical" | "Warning" | "Informational"
   ) => {
@@ -186,7 +189,11 @@ export default function DashboardPage() {
               </TableHeader>
               <TableBody>
                 {recentAlerts.map((alert: Alert) => (
-                  <TableRow key={alert.id}>
+                  <TableRow
+                    key={alert.id}
+                    className="cursor-pointer"
+                    onClick={() => router.push("/alerts")}
+                  >
                     <TableCell>
                       <Badge variant={getBadgeVariant(alert.severity)}>
                         {alert.severity}
