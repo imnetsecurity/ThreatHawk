@@ -55,9 +55,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <Link href="/settings" legacyBehavior passHref>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
-                </Link>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">Settings</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem>Support</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Logout</DropdownMenuItem>
