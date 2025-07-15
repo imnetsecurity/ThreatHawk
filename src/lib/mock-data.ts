@@ -1,4 +1,4 @@
-import { Alert, SysmonEvent, TimelineDataPoint } from "./types";
+import { Alert, SysmonEvent, TimelineDataPoint, RuleFile } from "./types";
 
 export const recentAlerts: Alert[] = [
   {
@@ -145,4 +145,15 @@ export const sysmonEvents: SysmonEvent[] = [
       ParentImage: "C:\\Windows\\System32\\cmd.exe",
     },
   },
+];
+
+export const yaraRules: RuleFile[] = [
+  { id: "yr-1", name: "apt_indicators.yar", content: "rule APT29_Dukebot { ... }" },
+  { id: "yr-2", name: "common_malware.yar", content: "rule Emotet { ... }" },
+  { id: "yr-3", name: "webshells.yar", content: "rule ChinaChopper { ... }" },
+];
+
+export const sysmonRules: RuleFile[] = [
+  { id: "sr-1", name: "threathawk_default.xml", content: "<Sysmon schemaversion=\"4.81\"> ... </Sysmon>" },
+  { id: "sr-2", name: "swift_on_security_fork.xml", content: "<Sysmon schemaversion=\"4.81\"> ... </Sysmon>" },
 ];

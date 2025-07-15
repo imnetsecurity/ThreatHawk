@@ -12,10 +12,14 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { yaraRules, sysmonRules } from "@/lib/mock-data";
+import { FileTree } from "./components/file-tree";
+import { AiRuleCreator } from "./components/ai-rule-creator";
+import { Separator } from "@/components/ui/separator";
 
 export default function RulesPage() {
   return (
-    <Tabs defaultValue="yara">
+    <Tabs defaultValue="sysmon">
       <TabsList className="grid w-full grid-cols-2 max-w-md">
         <TabsTrigger value="yara">YARA Rules</TabsTrigger>
         <TabsTrigger value="sysmon">Sysmon Configuration</TabsTrigger>
@@ -29,11 +33,16 @@ export default function RulesPage() {
               scanning.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Textarea
-              className="min-h-[400px] font-mono"
-              placeholder="/* Your YARA rule goes here */"
-            />
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-1">
+              <FileTree title="YARA Files" files={yaraRules} />
+            </div>
+            <div className="md:col-span-2">
+              <Textarea
+                className="h-[600px] font-mono"
+                defaultValue={yaraRules[0].content}
+              />
+            </div>
           </CardContent>
         </Card>
       </TabsContent>
@@ -46,11 +55,20 @@ export default function RulesPage() {
               agents.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Textarea
-              className="min-h-[400px] font-mono"
-              placeholder="<!-- Your Sysmon XML configuration goes here -->"
-            />
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               <div className="md:col-span-1">
+                 <FileTree title="Sysmon Configs" files={sysmonRules} />
+               </div>
+               <div className="md:col-span-2">
+                 <Textarea
+                   className="h-[600px] font-mono"
+                   defaultValue={sysmonRules[0].content}
+                 />
+               </div>
+            </div>
+            <Separator />
+            <AiRuleCreator />
           </CardContent>
         </Card>
       </TabsContent>

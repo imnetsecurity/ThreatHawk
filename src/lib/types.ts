@@ -49,3 +49,9 @@ export type TimelineDataPoint = {
   warning: number;
   informational: number;
 };
+
+export type RuleFile = {
+  id: string;
+  name: string;
+  content: string;
+};
