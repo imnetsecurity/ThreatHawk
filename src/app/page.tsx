@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -15,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
-  BarChart,
+  BarChart as BarChartIcon,
   Bell,
   Cpu,
   FileText,
@@ -28,7 +30,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { Bar, CartesianGrid, XAxis, YAxis } from "recharts";
+import { BarChart, Bar, CartesianGrid, XAxis, YAxis } from "recharts";
 import { recentAlerts, timelineData } from "@/lib/mock-data";
 import { Alert } from "@/lib/types";
 
