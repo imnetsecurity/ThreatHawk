@@ -36,7 +36,6 @@ export function AnomalyPanel({
   const hasFileHash = !!event?.process.hash;
 
   React.useEffect(() => {
-    // Reset analysis when a new event is selected or event is cleared
     setAnalysisResult(null);
 
     if (event) {
@@ -47,7 +46,6 @@ export function AnomalyPanel({
           setAnalysisResult(result);
         } catch (error) {
           console.error("Analysis failed:", error);
-          // You could set an error state here to show in the UI
         } finally {
           setIsLoading(false);
         }
@@ -91,19 +89,19 @@ export function AnomalyPanel({
               <span className="text-muted-foreground">PID: </span>
               {event.process.pid}
             </p>
-            <p className="text-sm font-mono break-all">
-              <span className="text-muted-foreground font-sans">
-                Command Line:{" "}
-              </span>
-              {event.process.commandLine}
-            </p>
             {event.parentProcess && (
               <p className="text-sm">
                 <span className="text-muted-foreground">Parent: </span>
                 {event.parentProcess.name} ({event.parentProcess.pid})
               </p>
             )}
-             {event.process.hash && (
+            <p className="text-sm font-mono break-all">
+              <span className="text-muted-foreground font-sans">
+                Command Line:{" "}
+              </span>
+              {event.process.commandLine}
+            </p>
+            {event.process.hash && (
               <p className="text-sm font-mono break-all">
                 <span className="text-muted-foreground font-sans">
                   SHA256:{" "}
