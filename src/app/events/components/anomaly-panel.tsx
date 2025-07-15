@@ -39,7 +39,7 @@ export function AnomalyPanel({
     // Reset analysis when a new event is selected or event is cleared
     setAnalysisResult(null);
 
-    if (event && hasFileHash) {
+    if (event) {
       const handleAnalyze = async () => {
         setIsLoading(true);
         try {
@@ -54,7 +54,7 @@ export function AnomalyPanel({
       };
       handleAnalyze();
     }
-  }, [event, hasFileHash]);
+  }, [event]);
 
 
   if (!event) {

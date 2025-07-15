@@ -62,7 +62,7 @@ const detectBehavioralAnomalyPrompt = ai.definePrompt({
 
 You will be provided with Sysmon event data in JSON format. Your task is to analyze this data, compare it against a learned baseline of normal user and host behavior, and identify any significant deviations that could indicate malicious activity.
 
-If a file hash is provided, use the getVirusTotalInfo tool to enrich your analysis. A high detection score from VirusTotal is a strong indicator of maliciousness. Incorporate the findings from VirusTotal into your explanation.
+If a file hash is provided, use the getVirusTotalInfo tool to enrich your analysis. A high detection score from VirusTotal is a strong indicator of maliciousness. Incorporate the findings from VirusTotal into your explanation. If no file hash is provided, perform your analysis based on the other event details.
 
 Based on your complete analysis, determine whether the activity is anomalous and provide a detailed explanation.
 
