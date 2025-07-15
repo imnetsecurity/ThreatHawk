@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, TriangleAlert } from "lucide-react";
 import type { Alert } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 const getBadgeVariant = (
   severity: "Critical" | "Warning" | "Informational"
@@ -60,6 +61,17 @@ export function AlertsTable({ initialAlerts }: { initialAlerts: Alert[] }) {
     );
   };
 
+  const getRowClass = (severity: Alert['severity']) => {
+    switch (severity) {
+      case 'Critical':
+        return 'bg-destructive/10 hover:bg-destructive/20';
+      case 'Warning':
+        return 'bg-secondary/40 hover:bg-secondary/60';
+      default:
+        return '';
+    }
+  }
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -76,7 +88,7 @@ export function AlertsTable({ initialAlerts }: { initialAlerts: Alert[] }) {
         </TableHeader>
         <TableBody>
           {alerts.map((alert) => (
-            <TableRow key={alert.id}>
+            <TableRow key={alert.id} className={cn(getRowClass(alert.severity))}>
               <TableCell>
                 <Badge variant={getBadgeVariant(alert.severity)}>
                   <TriangleAlert className="mr-1 h-3 w-3" />
