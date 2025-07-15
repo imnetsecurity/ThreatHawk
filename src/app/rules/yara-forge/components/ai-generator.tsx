@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Loader2, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { generateYaraXRule } from '../actions';
 
 interface AiGeneratorProps {
     onRuleGenerated: (rule: string) => void;
@@ -18,18 +19,21 @@ export function AiGenerator({ onRuleGenerated }: AiGeneratorProps) {
     const { toast } = useToast();
 
     const handleGenerate = async () => {
+        if (!prompt) return;
         setIsLoading(true);
-        // Placeholder for actual AI call
-        setTimeout(() => {
-             toast({
+        try {
+            const result = await generateYaraXRule(prompt);
+            onRuleGenerated(result);
+        } catch (error) {
+            console.error("YARA-X rule generation failed:", error);
+            toast({
                 variant: "destructive",
-                title: "AI Not Implemented",
-                description: "AI rule generation is not yet connected.",
+                title: "AI Generation Failed",
+                description: "The AI could not generate a rule from your request. Please check your AI provider settings.",
             });
-            // Example output:
-            // onRuleGenerated('rule example_from_ai { meta: author = "AI" strings: $a = "example" condition: $a }');
+        } finally {
             setIsLoading(false);
-        }, 1500);
+        }
     };
 
     return (

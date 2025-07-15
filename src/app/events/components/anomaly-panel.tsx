@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Bot, X, Loader2, FileWarning, Terminal, ShieldCheck, Scan } from "lucide-react";
+import { Bot, X, Loader2, FileWarning, Terminal, ShieldCheck, Scan, AlertCircle } from "lucide-react";
 import type { SysmonEvent } from "@/lib/types";
 import { analyzeEventForAnomalies } from "../actions";
 import type { DetectBehavioralAnomalyOutput } from "@/ai/flows/behavioral-anomaly-detection";
@@ -31,12 +31,14 @@ export function AnomalyPanel({
   const [isLoading, setIsLoading] = React.useState(false);
   const [analysisResult, setAnalysisResult] =
     React.useState<DetectBehavioralAnomalyOutput | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
   const [isRuleDialogOpen, setIsRuleDialogOpen] = React.useState(false);
   const [isYaraDialogOpen, setIsYaraDialogOpen] = React.useState(false);
   const hasFileHash = !!event?.process.hash;
 
   React.useEffect(() => {
     setAnalysisResult(null);
+    setError(null);
 
     if (event) {
       const handleAnalyze = async () => {
@@ -46,6 +48,7 @@ export function AnomalyPanel({
           setAnalysisResult(result);
         } catch (error) {
           console.error("Analysis failed:", error);
+          setError("The AI analysis failed. Please check your AI provider settings or try again later.");
         } finally {
           setIsLoading(false);
         }
@@ -123,7 +126,7 @@ export function AnomalyPanel({
                 YARA Scan
               </Button>
           </div>
-          {(isLoading || analysisResult) && (
+          {(isLoading || analysisResult || error) && (
             <div>
               <Separator className="my-4"/>
               <h3 className="font-semibold mb-2 flex items-center gap-2">
@@ -134,6 +137,13 @@ export function AnomalyPanel({
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     <span>Analyzing with AI...</span>
                  </div>
+              )}
+              {error && (
+                <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Analysis Error</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
               {analysisResult && (
                 <div className="space-y-4 mt-2">

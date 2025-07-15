@@ -46,28 +46,12 @@ const initialRuleState: YaraXRuleState = {
   isGlobal: false,
   isPrivate: false,
   identifier: "my_rule",
-  tags: ["scanner", "threathawk"],
+  tags: [],
   meta: [
     { id: "meta-1", key: "author", value: "ThreatHawk", type: "string" },
-    { id: "meta-2", key: "version", value: "1.0", type: "string" },
   ],
-  strings: [
-    {
-      id: "string-1",
-      identifier: "$hex_string",
-      type: "hex",
-      value: "{ E2 34 A1 C8 23 FB }",
-      modifiers: { nocase: false, ascii: false, wide: false, fullword: false, private: false, xor: { enabled: false, min: 0, max: 255 }, base64: { enabled: false, alphabet: "" }, base64wide: { enabled: false, alphabet: ""} },
-    },
-    {
-      id: "string-2",
-      identifier: "$text_string",
-      type: "text",
-      value: "evil.exe",
-      modifiers: { nocase: true, ascii: true, wide: false, fullword: false, private: false, xor: { enabled: false, min: 0, max: 255 }, base64: { enabled: false, alphabet: "" }, base64wide: { enabled: false, alphabet: ""} },
-    },
-  ],
-  condition: "uint16(0) == 0x5A4D and ($hex_string or $text_string)",
+  strings: [],
+  condition: "false",
 };
 
 const initialBuilderItems: BuilderItem[] = [
@@ -101,7 +85,7 @@ export default function YaraForgePage() {
     if (ruleState.isGlobal) rule += "global ";
     if (ruleState.isPrivate) rule += "private ";
     
-    rule += `rule ${ruleState.identifier} `;
+    rule += `rule ${ruleState.identifier || 'my_rule'} `;
     if (ruleState.tags.length > 0) {
         rule += `: ${ruleState.tags.join(" ")} `;
     }
@@ -114,7 +98,7 @@ export default function YaraForgePage() {
     };
 
     // Meta section
-    if (ruleState.meta.length > 0) {
+    if (ruleState.meta.length > 0 && ruleState.meta.some(m => m.key && m.value)) {
         sections.meta += "  meta:\n";
         ruleState.meta.forEach(item => {
             if (item.key && (item.value || item.value === 0 || item.value === false)) {
@@ -125,7 +109,7 @@ export default function YaraForgePage() {
     }
 
     // Strings section
-    if (ruleState.strings.length > 0) {
+    if (ruleState.strings.length > 0 && ruleState.strings.some(s => s.identifier && s.value)) {
         sections.strings += "  strings:\n";
         ruleState.strings.forEach(s => {
             if (s.identifier && s.value) {
@@ -148,8 +132,10 @@ export default function YaraForgePage() {
     }
 
     // Condition section
-    sections.condition += "  condition:\n";
-    sections.condition += `    ${ruleState.condition}\n`;
+    if (ruleState.condition) {
+        sections.condition += "  condition:\n";
+        sections.condition += `    ${ruleState.condition}\n`;
+    }
 
     builderItems.forEach(item => {
         if(item.type !== 'header') {
