@@ -21,12 +21,12 @@ export type PowerShellInput = z.infer<typeof PowerShellInputSchema>;
 export const PowerShellOutputSchema = z.string().describe('The simulated output of the PowerShell command.');
 export type PowerShellOutput = z.infer<typeof PowerShellOutputSchema>;
 
-export async function executePowerShellCommandFlow(input: PowerShellInput): Promise<PowerShellOutput> {
-  const prompt = ai.definePrompt({
-    name: 'powershellGatewayPrompt',
-    input: { schema: PowerShellInputSchema },
-    output: { schema: PowerShellOutputSchema },
-    prompt: `You are a PowerShell terminal simulator for a security analysis tool called ThreatHawk. You are currently "connected" to the host: {{hostname}}.
+
+const powershellGatewayPrompt = ai.definePrompt({
+  name: 'powershellGatewayPrompt',
+  input: { schema: PowerShellInputSchema },
+  output: { schema: PowerShellOutputSchema },
+  prompt: `You are a PowerShell terminal simulator for a security analysis tool called ThreatHawk. You are currently "connected" to the host: {{hostname}}.
 
     Your task is to provide realistic, text-based output for the given PowerShell command. 
 
@@ -40,8 +40,9 @@ export async function executePowerShellCommandFlow(input: PowerShellInput): Prom
     {{command}}
     \`\`\`
     `,
-  });
+});
 
-  const { output } = await prompt(input);
+export async function executePowerShellCommandFlow(input: PowerShellInput): Promise<PowerShellOutput> {
+  const { output } = await powershellGatewayPrompt(input);
   return output!;
 }
