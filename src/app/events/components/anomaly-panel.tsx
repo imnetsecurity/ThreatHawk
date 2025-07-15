@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -32,26 +33,29 @@ export function AnomalyPanel({
     React.useState<DetectBehavioralAnomalyOutput | null>(null);
   const [isRuleDialogOpen, setIsRuleDialogOpen] = React.useState(false);
   const [isYaraDialogOpen, setIsYaraDialogOpen] = React.useState(false);
+  const hasFileHash = !!event?.process.hash;
 
   React.useEffect(() => {
-    // Reset analysis when a new event is selected
+    // Reset analysis when a new event is selected or event is cleared
     setAnalysisResult(null);
-  }, [event]);
 
-  const handleAnalyze = async () => {
-    if (!event) return;
-    setIsLoading(true);
-    setAnalysisResult(null);
-    try {
-      const result = await analyzeEventForAnomalies(event);
-      setAnalysisResult(result);
-    } catch (error) {
-      console.error("Analysis failed:", error);
-      // You could set an error state here to show in the UI
-    } finally {
-      setIsLoading(false);
+    if (event && hasFileHash) {
+      const handleAnalyze = async () => {
+        setIsLoading(true);
+        try {
+          const result = await analyzeEventForAnomalies(event);
+          setAnalysisResult(result);
+        } catch (error) {
+          console.error("Analysis failed:", error);
+          // You could set an error state here to show in the UI
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      handleAnalyze();
     }
-  };
+  }, [event, hasFileHash]);
+
 
   if (!event) {
     return (
@@ -60,8 +64,7 @@ export function AnomalyPanel({
       </div>
     );
   }
-
-  const hasFileHash = !!event.process.hash;
+  
   const hasVirusTotalScore =
     analysisResult?.virusTotalScore && analysisResult.virusTotalScore !== "0/0";
 
@@ -112,26 +115,7 @@ export function AnomalyPanel({
           <Separator />
           <div>
             <h3 className="font-semibold mb-2">Actions</h3>
-            <div className="flex gap-2">
-              <Button
-                onClick={handleAnalyze}
-                disabled={isLoading || !hasFileHash}
-                className="flex-1"
-                title={!hasFileHash ? "Event must have a file hash for analysis" : "Analyze for anomalies"}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Bot className="mr-2 h-4 w-4" />
-                    AI Analysis
-                  </>
-                )}
-              </Button>
-              <Button
+             <Button
                 variant="outline"
                 disabled={!hasFileHash}
                 onClick={() => setIsYaraDialogOpen(true)}
@@ -140,56 +124,63 @@ export function AnomalyPanel({
                 <Scan className="mr-2 h-4 w-4" />
                 YARA Scan
               </Button>
-            </div>
           </div>
-          {analysisResult && (
+          {(isLoading || analysisResult) && (
             <div>
               <Separator className="my-4"/>
               <h3 className="font-semibold mb-2 flex items-center gap-2">
-                <Bot className="h-5 w-5 text-primary" /> AI Analysis Result
+                <Bot className="h-5 w-5 text-primary" /> AI Analysis
               </h3>
-              {hasVirusTotalScore && (
-                <div className="mb-4">
-                   <Alert variant="destructive">
-                     <ShieldCheck className="h-4 w-4" />
-                     <AlertTitle>VirusTotal Match!</AlertTitle>
-                     <AlertDescription>
-                       This file is known to be malicious. Score:{" "}
-                       <Badge variant="destructive">{analysisResult.virusTotalScore}</Badge>
-                     </AlertDescription>
-                   </Alert>
-                </div>
+              {isLoading && (
+                 <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <span>Analyzing with AI...</span>
+                 </div>
               )}
-              <Alert
-                variant={analysisResult.isAnomalous ? "destructive" : "default"}
-              >
-                <FileWarning className="h-4 w-4" />
-                <AlertTitle>
-                  {analysisResult.isAnomalous
-                    ? "Anomaly Detected!"
-                    : "Behavior Appears Normal"}
-                </AlertTitle>
-                <AlertDescription>
-                  {analysisResult.explanation}
-                </AlertDescription>
-              </Alert>
-              {analysisResult.isAnomalous && (
-                <div className="mt-4">
-                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                    <Terminal className="h-4 w-4" /> Suggested Action
-                  </h4>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    The AI has identified this event as anomalous. You can use
-                    the AI to generate a Sysmon rule to detect this behavior in
-                    the future.
-                  </p>
-                  <Button
-                    size="sm"
-                    className="mt-2"
-                    onClick={() => setIsRuleDialogOpen(true)}
+              {analysisResult && (
+                <div className="space-y-4 mt-2">
+                  {hasVirusTotalScore && (
+                    <Alert variant="destructive">
+                      <ShieldCheck className="h-4 w-4" />
+                      <AlertTitle>VirusTotal Match!</AlertTitle>
+                      <AlertDescription>
+                        This file is known to be malicious. Score:{" "}
+                        <Badge variant="destructive">{analysisResult.virusTotalScore}</Badge>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  <Alert
+                    variant={analysisResult.isAnomalous ? "destructive" : "default"}
                   >
-                    Generate & Deploy Rule
-                  </Button>
+                    <FileWarning className="h-4 w-4" />
+                    <AlertTitle>
+                      {analysisResult.isAnomalous
+                        ? "Anomaly Detected!"
+                        : "Behavior Appears Normal"}
+                    </AlertTitle>
+                    <AlertDescription>
+                      {analysisResult.explanation}
+                    </AlertDescription>
+                  </Alert>
+                  {analysisResult.isAnomalous && (
+                    <div>
+                      <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                        <Terminal className="h-4 w-4" /> Suggested Action
+                      </h4>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        The AI has identified this event as anomalous. You can use
+                        the AI to generate a Sysmon rule to detect this behavior in
+                        the future.
+                      </p>
+                      <Button
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => setIsRuleDialogOpen(true)}
+                      >
+                        Generate & Deploy Rule
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
