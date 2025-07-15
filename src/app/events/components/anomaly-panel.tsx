@@ -12,11 +12,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Bot, X, Loader2, FileWarning, Terminal } from "lucide-react";
+import { Bot, X, Loader2, FileWarning, Terminal, ShieldCheck } from "lucide-react";
 import type { SysmonEvent } from "@/lib/types";
 import { analyzeEventForAnomalies } from "../actions";
 import type { DetectBehavioralAnomalyOutput } from "@/ai/flows/behavioral-anomaly-detection";
 import { RuleGenerationDialog } from "./rule-generation-dialog";
+import { Badge } from "@/components/ui/badge";
 
 export function AnomalyPanel({
   event,
@@ -58,6 +59,9 @@ export function AnomalyPanel({
     );
   }
 
+  const hasVirusTotalScore =
+    analysisResult?.virusTotalScore && analysisResult.virusTotalScore !== "0/0";
+
   return (
     <>
       <Card className="w-1/3 min-w-[400px] flex flex-col h-[calc(100vh-10rem)]">
@@ -93,6 +97,14 @@ export function AnomalyPanel({
                 {event.parentProcess.name} ({event.parentProcess.pid})
               </p>
             )}
+             {event.process.hash && (
+              <p className="text-sm font-mono break-all">
+                <span className="text-muted-foreground font-sans">
+                  SHA256:{" "}
+                </span>
+                {event.process.hash}
+              </p>
+            )}
           </div>
           <Separator />
           {analysisResult && (
@@ -100,6 +112,18 @@ export function AnomalyPanel({
               <h3 className="font-semibold mb-2 flex items-center gap-2">
                 <Bot className="h-5 w-5 text-primary" /> AI Analysis
               </h3>
+              {hasVirusTotalScore && (
+                <div className="mb-4">
+                   <Alert variant="destructive">
+                     <ShieldCheck className="h-4 w-4" />
+                     <AlertTitle>VirusTotal Match!</AlertTitle>
+                     <AlertDescription>
+                       This file is known to be malicious. Score:{" "}
+                       <Badge variant="destructive">{analysisResult.virusTotalScore}</Badge>
+                     </AlertDescription>
+                   </Alert>
+                </div>
+              )}
               <Alert
                 variant={analysisResult.isAnomalous ? "destructive" : "default"}
               >
@@ -138,8 +162,9 @@ export function AnomalyPanel({
         <CardFooter>
           <Button
             onClick={handleAnalyze}
-            disabled={isLoading}
+            disabled={isLoading || !event.process.hash}
             className="w-full"
+            title={!event.process.hash ? "Event must have a file hash for analysis" : "Analyze for anomalies"}
           >
             {isLoading ? (
               <>
