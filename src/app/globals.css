@@ -34,6 +34,11 @@
 
     --radius: 0.5rem;
 
+    /* Custom Chart Colors */
+    --chart-1: 183 100% 74%; /* primary */
+    --chart-2: 0 0% 60%; /* muted-foreground */
+
+
     /* Custom sidebar colors for dark theme */
     --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 0 0% 95.9%;
@@ -75,6 +80,10 @@
     --ring: 183 100% 74%;
 
     --radius: 0.5rem;
+    
+    /* Custom Chart Colors */
+    --chart-1: 183 100% 74%; /* primary */
+    --chart-2: 0 0% 60%; /* muted-foreground */
 
     /* Custom sidebar colors for dark theme */
     --sidebar-background: 0 0% 10%;
