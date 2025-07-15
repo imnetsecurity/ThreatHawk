@@ -1,6 +1,6 @@
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
-import {ollama} from 'genkit-plugin-ollama';
+import {ollama} from 'genkitx-ollama';
 
 const ollamaHost = process.env.OLLAMA_HOST;
 const ollamaModel = process.env.OLLAMA_MODEL;

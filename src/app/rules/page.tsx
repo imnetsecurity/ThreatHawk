@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -16,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import type { RuleFile } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Scan } from "lucide-react";
+import { Loader2, Scan, Wrench } from "lucide-react";
 import { YaraScanDialog } from "../events/components/yara-scan-dialog";
 
 export default function RulesPage() {
@@ -126,12 +127,20 @@ export default function RulesPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Sysmon Configuration Management</CardTitle>
-            <CardDescription>
-              Edit, version, and deploy your master Sysmon configuration to
-              agents. Use the AI Rule Creator below to generate new rules from
-              natural language.
-            </CardDescription>
+             <div className="flex justify-between items-start">
+                <div>
+                    <CardTitle>Sysmon Configuration Management</CardTitle>
+                    <CardDescription>
+                    Edit, version, and deploy your master Sysmon configuration to agents.
+                    </CardDescription>
+                </div>
+                <Button asChild>
+                    <Link href="/rules/forge">
+                        <Wrench className="mr-2 h-4 w-4" />
+                        Open Sysmon Rule Forge
+                    </Link>
+                </Button>
+             </div>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
