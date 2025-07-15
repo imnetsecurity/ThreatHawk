@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -11,14 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronRight, HardDrive, Loader2, Power, PowerOff } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { sysmonEvents } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { executePowerShellCommand } from "./actions";
 
@@ -28,20 +21,15 @@ type TerminalLine = {
 };
 
 export default function ResponsePage() {
-  const agents = [
-    ...new Map(
-      sysmonEvents.map((item) => [item.agent.hostname, item.agent])
-    ).values(),
-  ];
-
-  const [selectedAgent, setSelectedAgent] = React.useState<string>("");
+  const [targetAgent, setTargetAgent] = React.useState<string>("");
+  const [connectedAgent, setConnectedAgent] = React.useState<string>("");
   const [isConnected, setIsConnected] = React.useState(false);
   const [isConnecting, setIsConnecting] = React.useState(false);
   const [isExecuting, setIsExecuting] = React.useState(false);
   const [command, setCommand] = React.useState("");
   const [history, setHistory] = React.useState<TerminalLine[]>([
     { type: "system", content: "ThreatHawk PowerShell Gateway v1.0" },
-    { type: "system", content: "Please select an agent and click 'Connect'." },
+    { type: "system", content: "Please enter a target agent and click 'Connect'." },
   ]);
   const terminalRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -60,22 +48,24 @@ export default function ResponsePage() {
   }, [isConnected]);
 
   const handleConnect = () => {
-    if (!selectedAgent) {
+    if (!targetAgent) {
       toast({
         variant: "destructive",
         title: "Connection Failed",
-        description: "Please select an agent first.",
+        description: "Please specify a target agent first.",
       });
       return;
     }
     setIsConnecting(true);
     setHistory((prev) => [
       ...prev,
-      { type: "system", content: `Connecting to ${selectedAgent}...` },
+      { type: "system", content: `Connecting to ${targetAgent}...` },
     ]);
+    // Simulate connection delay for realism
     setTimeout(() => {
       setIsConnecting(false);
       setIsConnected(true);
+      setConnectedAgent(targetAgent);
       setHistory((prev) => [
         ...prev,
         { type: "system", content: `Connection successful. Use 'exit' to disconnect.` },
@@ -87,8 +77,9 @@ export default function ResponsePage() {
     setIsConnected(false);
     setHistory((prev) => [
       ...prev,
-      { type: "system", content: `Disconnected from ${selectedAgent}.` },
+      { type: "system", content: `Disconnected from ${connectedAgent}.` },
     ]);
+    setConnectedAgent("");
   };
 
   const handleExecute = async () => {
@@ -109,7 +100,7 @@ export default function ResponsePage() {
     setIsExecuting(true);
 
     try {
-      const result = await executePowerShellCommand(command, selectedAgent);
+      const result = await executePowerShellCommand(command, connectedAgent);
       setHistory((prev) => [...prev, { type: "output", content: result }]);
     } catch (error) {
       console.error("Command execution failed:", error);
@@ -124,40 +115,31 @@ export default function ResponsePage() {
       <CardHeader>
         <CardTitle>Secure PowerShell Gateway</CardTitle>
         <CardDescription>
-          Execute commands and scripts on remote agents via a secure, audited
-          gateway.
+          Establish a secure connection to an agent to execute commands and scripts via a secure, audited gateway.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2">
             <HardDrive className="h-5 w-5 text-muted-foreground" />
-            <label htmlFor="agent-select" className="font-medium">
+            <label htmlFor="agent-input" className="font-medium">
               Target Agent:
             </label>
           </div>
-          <Select
-            value={selectedAgent}
-            onValueChange={setSelectedAgent}
+          <Input
+            id="agent-input"
+            placeholder="Enter hostname or IP address..."
+            className="w-full sm:w-[350px]"
+            value={targetAgent}
+            onChange={(e) => setTargetAgent(e.target.value)}
             disabled={isConnected || isConnecting}
-          >
-            <SelectTrigger id="agent-select" className="w-full sm:w-[350px]">
-              <SelectValue placeholder="Select an agent to connect to..." />
-            </SelectTrigger>
-            <SelectContent>
-              {agents.map((agent) => (
-                <SelectItem key={agent.id} value={agent.hostname}>
-                  {agent.hostname} ({agent.ip})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
           {isConnected ? (
             <Button variant="destructive" onClick={handleDisconnect}>
               <PowerOff /> Disconnect
             </Button>
           ) : (
-            <Button onClick={handleConnect} disabled={isConnecting || !selectedAgent}>
+            <Button onClick={handleConnect} disabled={isConnecting || !targetAgent}>
               {isConnecting ? (
                 <Loader2 className="animate-spin" />
               ) : (
@@ -178,7 +160,7 @@ export default function ResponsePage() {
               {line.type === "command" && (
                 <div className="flex gap-2">
                   <span className="text-cyan-400">
-                    PS {selectedAgent}&gt;
+                    PS {connectedAgent}&gt;
                   </span>
                   <span className="text-white flex-1">{line.content}</span>
                 </div>
@@ -215,7 +197,7 @@ export default function ResponsePage() {
             }}
             className="flex items-center gap-2"
         >
-          <span className="text-cyan-400 font-mono hidden sm:inline">PS {selectedAgent}&gt;</span>
+          <span className="text-cyan-400 font-mono hidden sm:inline">PS {connectedAgent}&gt;</span>
           <ChevronRight className="h-5 w-5 text-muted-foreground sm:hidden" />
           <Input
             ref={inputRef}
