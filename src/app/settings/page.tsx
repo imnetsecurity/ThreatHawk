@@ -17,6 +17,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { saveSettings } from "./actions";
@@ -25,14 +27,25 @@ import { Separator } from "@/components/ui/separator";
 
 export default function SettingsPage() {
   const [apiKey, setApiKey] = React.useState("");
-  const [model, setModel] = React.useState("googleai/gemini-1.5-flash-latest");
+  const [provider, setProvider] = React.useState<'google' | 'ollama'>("google");
+  
+  const [googleModel, setGoogleModel] = React.useState("googleai/gemini-1.5-flash-latest");
+  const [ollamaHost, setOllamaHost] = React.useState("http://127.0.0.1:11434");
+  const [ollamaModel, setOllamaModel] = React.useState("");
+  
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
 
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      await saveSettings({ virusTotalApiKey: apiKey, genkitModel: model });
+      await saveSettings({ 
+        virusTotalApiKey: apiKey, 
+        genkitProvider: provider,
+        googleModel: googleModel,
+        ollamaHost: ollamaHost,
+        ollamaModel: ollamaModel,
+      });
       toast({
         title: "Settings Saved",
         description: "Your settings have been updated successfully. Changes may require an app restart to take effect.",
@@ -74,31 +87,86 @@ export default function SettingsPage() {
 
         <Separator />
 
-        <div className="space-y-2">
-          <Label htmlFor="model-select">AI Language Model</Label>
+        <div className="space-y-4">
+          <Label>AI Provider</Label>
           <Select
-            value={model}
-            onValueChange={setModel}
+            value={provider}
+            onValueChange={(value) => setProvider(value as 'google' | 'ollama')}
             disabled={isLoading}
           >
-            <SelectTrigger id="model-select" className="w-full sm:w-[350px]">
-              <SelectValue placeholder="Select an AI model..." />
+            <SelectTrigger className="w-full sm:w-[350px]">
+              <SelectValue placeholder="Select an AI provider..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="googleai/gemini-1.5-flash-latest">
-                Gemini 1.5 Flash (Latest)
-              </SelectItem>
-              <SelectItem value="googleai/gemini-1.5-pro-latest">
-                Gemini 1.5 Pro (Latest)
-              </SelectItem>
-              <SelectItem value="googleai/gemini-1.0-pro">
-                Gemini 1.0 Pro
-              </SelectItem>
+                <SelectItem value="google">
+                  Google AI (Cloud)
+                </SelectItem>
+                <SelectItem value="ollama">
+                  Ollama (On-Premise)
+                </SelectItem>
             </SelectContent>
           </Select>
-           <p className="text-sm text-muted-foreground">
-            Select the model used for all AI analysis and generation tasks.
-          </p>
+
+          {provider === 'google' && (
+             <div className="space-y-2 pl-4 border-l-2 border-muted">
+                <Label htmlFor="model-select">Google AI Model</Label>
+                <Select
+                    value={googleModel}
+                    onValueChange={setGoogleModel}
+                    disabled={isLoading}
+                >
+                    <SelectTrigger id="model-select" className="w-full sm:w-[350px]">
+                    <SelectValue placeholder="Select a Google AI model..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="googleai/gemini-1.5-flash-latest">
+                            Gemini 1.5 Flash (Latest)
+                        </SelectItem>
+                        <SelectItem value="googleai/gemini-1.5-pro-latest">
+                            Gemini 1.5 Pro (Latest)
+                        </SelectItem>
+                        <SelectItem value="googleai/gemini-1.0-pro">
+                            Gemini 1.0 Pro
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+                 <p className="text-sm text-muted-foreground">
+                    Select the model used for all AI analysis and generation tasks.
+                </p>
+             </div>
+          )}
+
+          {provider === 'ollama' && (
+              <div className="space-y-4 pl-4 border-l-2 border-muted">
+                <div className="space-y-2">
+                    <Label htmlFor="ollama-host">Ollama Host URL</Label>
+                    <Input
+                        id="ollama-host"
+                        placeholder="e.g., http://127.0.0.1:11434"
+                        value={ollamaHost}
+                        onChange={(e) => setOllamaHost(e.target.value)}
+                        disabled={isLoading}
+                    />
+                     <p className="text-sm text-muted-foreground">
+                        The full URL of your Ollama API endpoint.
+                    </p>
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="ollama-model">Ollama Model Name</Label>
+                    <Input
+                        id="ollama-model"
+                        placeholder="e.g., llama3, gemma"
+                        value={ollamaModel}
+                        onChange={(e) => setOllamaModel(e.target.value)}
+                        disabled={isLoading}
+                    />
+                     <p className="text-sm text-muted-foreground">
+                       The exact name of the model you have downloaded in Ollama.
+                    </p>
+                </div>
+              </div>
+          )}
+
         </div>
 
         <Button onClick={handleSave} disabled={isLoading || !apiKey}>
