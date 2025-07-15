@@ -12,10 +12,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Code, Bot, X, Loader2, FileWarning, Terminal } from "lucide-react";
+import { Bot, X, Loader2, FileWarning, Terminal } from "lucide-react";
 import type { SysmonEvent } from "@/lib/types";
 import { analyzeEventForAnomalies } from "../actions";
 import type { DetectBehavioralAnomalyOutput } from "@/ai/flows/behavioral-anomaly-detection";
+import { RuleGenerationDialog } from "./rule-generation-dialog";
 
 export function AnomalyPanel({
   event,
@@ -27,6 +28,7 @@ export function AnomalyPanel({
   const [isLoading, setIsLoading] = React.useState(false);
   const [analysisResult, setAnalysisResult] =
     React.useState<DetectBehavioralAnomalyOutput | null>(null);
+  const [isRuleDialogOpen, setIsRuleDialogOpen] = React.useState(false);
 
   React.useEffect(() => {
     // Reset analysis when a new event is selected
@@ -57,96 +59,110 @@ export function AnomalyPanel({
   }
 
   return (
-    <Card className="w-1/3 min-w-[400px] flex flex-col h-[calc(100vh-10rem)]">
-      <CardHeader className="flex flex-row items-start justify-between">
-        <div>
-          <CardTitle>Event Details</CardTitle>
-          <CardDescription>ID: {event.id}</CardDescription>
-        </div>
-        <Button variant="ghost" size="icon" onClick={onClose}>
-          <X className="h-4 w-4" />
-        </Button>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto space-y-4">
-        <div>
-          <h3 className="font-semibold mb-2">Process Info</h3>
-          <p className="text-sm">
-            <span className="text-muted-foreground">Name: </span>
-            {event.process.name}
-          </p>
-          <p className="text-sm">
-            <span className="text-muted-foreground">PID: </span>
-            {event.process.pid}
-          </p>
-          <p className="text-sm font-mono break-all">
-            <span className="text-muted-foreground font-sans">
-              Command Line:{" "}
-            </span>
-            {event.process.commandLine}
-          </p>
-          {event.parentProcess && (
-            <p className="text-sm">
-              <span className="text-muted-foreground">Parent: </span>
-              {event.parentProcess.name} ({event.parentProcess.pid})
-            </p>
-          )}
-        </div>
-        <Separator />
-        {analysisResult && (
+    <>
+      <Card className="w-1/3 min-w-[400px] flex flex-col h-[calc(100vh-10rem)]">
+        <CardHeader className="flex flex-row items-start justify-between">
           <div>
-            <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <Bot className="h-5 w-5 text-primary" /> AI Analysis
-            </h3>
-            <Alert
-              variant={
-                analysisResult.isAnomalous ? "destructive" : "default"
-              }
-            >
-              <FileWarning className="h-4 w-4" />
-              <AlertTitle>
-                {analysisResult.isAnomalous
-                  ? "Anomaly Detected!"
-                  : "Behavior Appears Normal"}
-              </AlertTitle>
-              <AlertDescription>
-                {analysisResult.explanation}
-              </AlertDescription>
-            </Alert>
-            {analysisResult.suggestedSysmonRule && (
-              <div className="mt-4">
-                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                  <Terminal className="h-4 w-4" /> Suggested Sysmon Rule
-                </h4>
-                <div className="bg-black/50 p-3 rounded-md">
-                  <pre className="text-xs text-white whitespace-pre-wrap font-mono">
-                    <code>{analysisResult.suggestedSysmonRule}</code>
-                  </pre>
-                </div>
-                <Button size="sm" className="mt-2">Deploy Rule</Button>
-              </div>
+            <CardTitle>Event Details</CardTitle>
+            <CardDescription>ID: {event.id}</CardDescription>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent className="flex-1 overflow-y-auto space-y-4">
+          <div>
+            <h3 className="font-semibold mb-2">Process Info</h3>
+            <p className="text-sm">
+              <span className="text-muted-foreground">Name: </span>
+              {event.process.name}
+            </p>
+            <p className="text-sm">
+              <span className="text-muted-foreground">PID: </span>
+              {event.process.pid}
+            </p>
+            <p className="text-sm font-mono break-all">
+              <span className="text-muted-foreground font-sans">
+                Command Line:{" "}
+              </span>
+              {event.process.commandLine}
+            </p>
+            {event.parentProcess && (
+              <p className="text-sm">
+                <span className="text-muted-foreground">Parent: </span>
+                {event.parentProcess.name} ({event.parentProcess.pid})
+              </p>
             )}
           </div>
-        )}
-      </CardContent>
-      <CardFooter>
-        <Button
-          onClick={handleAnalyze}
-          disabled={isLoading}
-          className="w-full"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Analyzing...
-            </>
-          ) : (
-            <>
-              <Bot className="mr-2 h-4 w-4" />
-              Analyze for Anomalies
-            </>
+          <Separator />
+          {analysisResult && (
+            <div>
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <Bot className="h-5 w-5 text-primary" /> AI Analysis
+              </h3>
+              <Alert
+                variant={analysisResult.isAnomalous ? "destructive" : "default"}
+              >
+                <FileWarning className="h-4 w-4" />
+                <AlertTitle>
+                  {analysisResult.isAnomalous
+                    ? "Anomaly Detected!"
+                    : "Behavior Appears Normal"}
+                </AlertTitle>
+                <AlertDescription>
+                  {analysisResult.explanation}
+                </AlertDescription>
+              </Alert>
+              {analysisResult.isAnomalous && (
+                <div className="mt-4">
+                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                    <Terminal className="h-4 w-4" /> Suggested Action
+                  </h4>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    The AI has identified this event as anomalous. You can use
+                    the AI to generate a Sysmon rule to detect this behavior in
+                    the future.
+                  </p>
+                  <Button
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => setIsRuleDialogOpen(true)}
+                  >
+                    Generate & Deploy Rule
+                  </Button>
+                </div>
+              )}
+            </div>
           )}
-        </Button>
-      </CardFooter>
-    </Card>
+        </CardContent>
+        <CardFooter>
+          <Button
+            onClick={handleAnalyze}
+            disabled={isLoading}
+            className="w-full"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Bot className="mr-2 h-4 w-4" />
+                Analyze for Anomalies
+              </>
+            )}
+          </Button>
+        </CardFooter>
+      </Card>
+      {analysisResult && event && (
+        <RuleGenerationDialog
+          isOpen={isRuleDialogOpen}
+          setIsOpen={setIsRuleDialogOpen}
+          anomalyDescription={analysisResult.explanation}
+          event={event}
+        />
+      )}
+    </>
   );
 }
