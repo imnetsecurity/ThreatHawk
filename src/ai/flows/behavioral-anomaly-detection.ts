@@ -83,11 +83,10 @@ const detectBehavioralAnomalyFlow = ai.defineFlow(
     outputSchema: DetectBehavioralAnomalyOutputSchema,
   },
   async input => {
-    const llmResponse = await detectBehavioralAnomalyPrompt(input);
-    const output = llmResponse.output;
+    const {output, history} = await detectBehavioralAnomalyPrompt(input);
 
     // Manually extract tool output to populate virusTotalScore
-    const virusTotalToolCall = llmResponse.history.find(
+    const virusTotalToolCall = history.find(
       (turn) => turn.role === 'tool' && turn.part.toolResponse.name === 'getVirusTotalInfo'
     );
 
