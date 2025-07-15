@@ -35,6 +35,8 @@ import { BarChart, Bar, CartesianGrid, XAxis, YAxis } from "recharts";
 import { recentAlerts, timelineData } from "@/lib/mock-data";
 import { Alert } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const chartConfig = {
   informational: {
@@ -81,45 +83,53 @@ export default function DashboardPage() {
     }
   };
 
+  const cardClasses = "transition-all hover:bg-card/80 hover:shadow-md cursor-pointer";
+
   return (
     <div className="flex flex-col gap-8">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Events (Last 24h)
-            </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1,234,567</div>
-            <p className="text-xs text-muted-foreground">
-              +15.2% from last 24h
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Alerts</CardTitle>
-            <ShieldAlert className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">88</div>
-            <p className="text-xs text-muted-foreground">
-              +2 critical alerts in last hour
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Agents Online</CardTitle>
-            <Cpu className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">4,982 / 5,000</div>
-            <p className="text-xs text-muted-foreground">99.6% uptime</p>
-          </CardContent>
-        </Card>
+        <Link href="/events">
+          <Card className={cardClasses}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Events (Last 24h)
+              </CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">1,234,567</div>
+              <p className="text-xs text-muted-foreground">
+                +15.2% from last 24h
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/alerts">
+          <Card className={cardClasses}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Alerts</CardTitle>
+              <ShieldAlert className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">88</div>
+              <p className="text-xs text-muted-foreground">
+                +2 critical alerts in last hour
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+         <Link href="/response">
+          <Card className={cardClasses}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Agents Online</CardTitle>
+              <Cpu className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">4,982 / 5,000</div>
+              <p className="text-xs text-muted-foreground">99.6% uptime</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
