@@ -20,14 +20,14 @@ import {
 } from "@/components/ui/select";
 import { sysmonEvents } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
+import { executePowerShellCommand } from "./actions";
 
 type TerminalLine = {
-  type: "command" | "output" | "system";
+  type: "command" | "output" | "system" | "error";
   content: string;
 };
 
 export default function ResponsePage() {
-  // Get unique hostnames from mock data
   const agents = [
     ...new Map(
       sysmonEvents.map((item) => [item.agent.hostname, item.agent])
@@ -37,20 +37,27 @@ export default function ResponsePage() {
   const [selectedAgent, setSelectedAgent] = React.useState<string>("");
   const [isConnected, setIsConnected] = React.useState(false);
   const [isConnecting, setIsConnecting] = React.useState(false);
+  const [isExecuting, setIsExecuting] = React.useState(false);
   const [command, setCommand] = React.useState("");
   const [history, setHistory] = React.useState<TerminalLine[]>([
     { type: "system", content: "ThreatHawk PowerShell Gateway v1.0" },
     { type: "system", content: "Please select an agent and click 'Connect'." },
   ]);
   const terminalRef = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   React.useEffect(() => {
-    // Scroll to the bottom of the terminal on new output
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
   }, [history]);
+
+  React.useEffect(() => {
+    if (isConnected && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isConnected]);
 
   const handleConnect = () => {
     if (!selectedAgent) {
@@ -71,7 +78,7 @@ export default function ResponsePage() {
       setIsConnected(true);
       setHistory((prev) => [
         ...prev,
-        { type: "system", content: "Connection successful." },
+        { type: "system", content: `Connection successful. Use 'exit' to disconnect.` },
       ]);
     }, 1500);
   };
@@ -84,37 +91,32 @@ export default function ResponsePage() {
     ]);
   };
 
-  const handleExecute = () => {
-    if (!command) return;
+  const handleExecute = async () => {
+    if (!command || isExecuting) return;
+
+    if (command.toLowerCase().trim() === 'exit') {
+        handleDisconnect();
+        setCommand("");
+        return;
+    }
+
     const newHistory: TerminalLine[] = [
       ...history,
       { type: "command", content: command },
     ];
-    // Mocked responses
-    if (command.toLowerCase().includes("get-process")) {
-      newHistory.push({
-        type: "output",
-        content: `
-Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
--------  ------    -----      -----     ------     --  -- -----------
-    850      55    98140     145820      23.50   4567   1 winword
-    430      32    45120      89421      11.10   1234   1 powershell
-`,
-      });
-    } else if (command.toLowerCase() === "whoami") {
-      newHistory.push({
-        type: "output",
-        content: "corp\\th-admin",
-      });
-    } else {
-        newHistory.push({
-        type: "output",
-        content: `Command '${command}' executed successfully. No output returned.`,
-        });
-    }
-
     setHistory(newHistory);
     setCommand("");
+    setIsExecuting(true);
+
+    try {
+      const result = await executePowerShellCommand(command, selectedAgent);
+      setHistory((prev) => [...prev, { type: "output", content: result }]);
+    } catch (error) {
+      console.error("Command execution failed:", error);
+      setHistory((prev) => [...prev, { type: "error", content: "Command failed to execute." }]);
+    } finally {
+      setIsExecuting(false);
+    }
   };
 
   return (
@@ -155,7 +157,7 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
               <PowerOff /> Disconnect
             </Button>
           ) : (
-            <Button onClick={handleConnect} disabled={isConnecting}>
+            <Button onClick={handleConnect} disabled={isConnecting || !selectedAgent}>
               {isConnecting ? (
                 <Loader2 className="animate-spin" />
               ) : (
@@ -169,16 +171,17 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
         <div
           ref={terminalRef}
           className="font-mono text-sm bg-black rounded-lg p-4 h-[500px] overflow-y-auto text-white space-y-2"
+          onClick={() => inputRef.current?.focus()}
         >
           {history.map((line, index) => (
             <div key={index}>
               {line.type === "command" && (
-                <>
+                <div className="flex gap-2">
                   <span className="text-cyan-400">
-                    PS C:\Users\th-admin&gt;
-                  </span>{" "}
-                  <span className="text-white">{line.content}</span>
-                </>
+                    PS {selectedAgent}&gt;
+                  </span>
+                  <span className="text-white flex-1">{line.content}</span>
+                </div>
               )}
               {line.type === "output" && (
                 <pre className="whitespace-pre-wrap text-lime-300">
@@ -190,15 +193,19 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
                   {line.content}
                 </p>
               )}
+              {line.type === "error" && (
+                 <p className="text-destructive">
+                    {line.content}
+                 </p>
+              )}
             </div>
           ))}
-          {isConnected && (
-             <div>
-                 <span className="text-cyan-400">
-                    PS C:\Users\th-admin&gt;
-                 </span>{" "}
-            </div>
-          )}
+           {isExecuting && (
+                <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    <span className="text-muted-foreground">Executing...</span>
+                </div>
+            )}
         </div>
 
         <form
@@ -208,15 +215,18 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
             }}
             className="flex items-center gap-2"
         >
-          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          <span className="text-cyan-400 font-mono hidden sm:inline">PS {selectedAgent}&gt;</span>
+          <ChevronRight className="h-5 w-5 text-muted-foreground sm:hidden" />
           <Input
+            ref={inputRef}
             placeholder="Enter PowerShell command..."
             className="font-mono"
             value={command}
             onChange={(e) => setCommand(e.target.value)}
-            disabled={!isConnected}
+            disabled={!isConnected || isExecuting}
+            autoComplete="off"
           />
-          <Button type="submit" disabled={!isConnected}>
+          <Button type="submit" disabled={!isConnected || isExecuting || !command}>
             Execute
           </Button>
         </form>
@@ -224,5 +234,3 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
     </Card>
   );
 }
-
-    
