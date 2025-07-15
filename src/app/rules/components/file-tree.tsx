@@ -12,8 +12,17 @@ import { Button } from "@/components/ui/button"
 import { FileText } from "lucide-react"
 import type { RuleFile } from "@/lib/types"
 
-export function FileTree({ title, files }: { title: string, files: RuleFile[] }) {
-  const [selectedFile, setSelectedFile] = React.useState<string>(files[0]?.id || "");
+export function FileTree({ 
+  title, 
+  files,
+  selectedFile,
+  onSelectFile
+}: { 
+  title: string, 
+  files: RuleFile[],
+  selectedFile: string,
+  onSelectFile: (id: string) => void
+}) {
 
   return (
     <Card className="h-full">
@@ -27,7 +36,7 @@ export function FileTree({ title, files }: { title: string, files: RuleFile[] })
                 key={file.id}
                 variant={selectedFile === file.id ? "secondary" : "ghost"}
                 className="w-full justify-start"
-                onClick={() => setSelectedFile(file.id)}
+                onClick={() => onSelectFile(file.id)}
               >
                 <FileText className="mr-2 h-4 w-4" />
                 {file.name}

@@ -1,3 +1,7 @@
+
+"use client";
+
+import * as React from "react";
 import {
   Card,
   CardContent,
@@ -16,8 +20,22 @@ import { yaraRules, sysmonRules } from "@/lib/mock-data";
 import { FileTree } from "./components/file-tree";
 import { AiRuleCreator } from "./components/ai-rule-creator";
 import { Separator } from "@/components/ui/separator";
+import type { RuleFile } from "@/lib/types";
 
 export default function RulesPage() {
+  const [selectedYaraRule, setSelectedYaraRule] = React.useState<RuleFile>(yaraRules[0]);
+  const [selectedSysmonRule, setSelectedSysmonRule] = React.useState<RuleFile>(sysmonRules[0]);
+
+  const handleSelectYara = (fileId: string) => {
+    const file = yaraRules.find(r => r.id === fileId);
+    if (file) setSelectedYaraRule(file);
+  }
+
+  const handleSelectSysmon = (fileId: string) => {
+    const file = sysmonRules.find(r => r.id === fileId);
+    if (file) setSelectedSysmonRule(file);
+  }
+
   return (
     <Tabs defaultValue="sysmon">
       <TabsList className="grid w-full grid-cols-2 max-w-md">
@@ -35,12 +53,13 @@ export default function RulesPage() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-1">
-              <FileTree title="YARA Files" files={yaraRules} />
+              <FileTree title="YARA Files" files={yaraRules} selectedFile={selectedYaraRule.id} onSelectFile={handleSelectYara} />
             </div>
             <div className="md:col-span-2">
               <Textarea
+                key={selectedYaraRule.id}
                 className="h-[600px] font-mono"
-                defaultValue={yaraRules[0].content}
+                defaultValue={selectedYaraRule.content}
               />
             </div>
           </CardContent>
@@ -58,12 +77,13 @@ export default function RulesPage() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                <div className="md:col-span-1">
-                 <FileTree title="Sysmon Configs" files={sysmonRules} />
+                 <FileTree title="Sysmon Configs" files={sysmonRules} selectedFile={selectedSysmonRule.id} onSelectFile={handleSelectSysmon} />
                </div>
                <div className="md:col-span-2">
                  <Textarea
+                   key={selectedSysmonRule.id}
                    className="h-[600px] font-mono"
-                   defaultValue={sysmonRules[0].content}
+                   defaultValue={selectedSysmonRule.content}
                  />
                </div>
             </div>
