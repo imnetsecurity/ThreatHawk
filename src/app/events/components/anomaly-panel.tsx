@@ -196,12 +196,11 @@ export function AnomalyPanel({
           event={event}
         />
       )}
-       {event && hasFileHash && (
+       {event && (
         <YaraScanDialog
           isOpen={isYaraDialogOpen}
           setIsOpen={setIsYaraDialogOpen}
-          fileHash={event.process.hash!}
-          agentHostname={event.agent.hostname}
+          initialFileHash={event.process.hash}
         />
       )}
     </>
