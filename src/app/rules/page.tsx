@@ -22,6 +22,8 @@ import { AiRuleCreator } from "./components/ai-rule-creator";
 import { Separator } from "@/components/ui/separator";
 import type { RuleFile } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 export default function RulesPage() {
   const [selectedYaraRule, setSelectedYaraRule] = React.useState<RuleFile>(yaraRules[0]);
@@ -29,6 +31,10 @@ export default function RulesPage() {
   
   const [selectedSysmonRule, setSelectedSysmonRule] = React.useState<RuleFile>(sysmonRules[0]);
   const [sysmonContent, setSysmonContent] = React.useState(sysmonRules[0].content);
+
+  const [isSavingYara, setIsSavingYara] = React.useState(false);
+  const [isSavingSysmon, setIsSavingSysmon] = React.useState(false);
+  const { toast } = useToast();
 
   const handleSelectYara = (fileId: string) => {
     const file = yaraRules.find(r => r.id === fileId);
@@ -44,6 +50,30 @@ export default function RulesPage() {
       setSelectedSysmonRule(file);
       setSysmonContent(file.content);
     }
+  }
+
+  const handleSaveYara = () => {
+    setIsSavingYara(true);
+    // Simulate API call
+    setTimeout(() => {
+        toast({
+            title: "YARA Rule Saved!",
+            description: `Changes to ${selectedYaraRule.name} have been saved.`
+        });
+        setIsSavingYara(false);
+    }, 1000);
+  }
+
+  const handleSaveSysmon = () => {
+    setIsSavingSysmon(true);
+    // Simulate API call
+    setTimeout(() => {
+        toast({
+            title: "Sysmon Config Saved & Deployed!",
+            description: `Configuration ${selectedSysmonRule.name} has been deployed.`
+        });
+        setIsSavingSysmon(false);
+    }, 1500);
   }
 
   return (
@@ -75,7 +105,10 @@ export default function RulesPage() {
                 />
               </div>
             </div>
-             <Button>Save Changes</Button>
+             <Button onClick={handleSaveYara} disabled={isSavingYara}>
+                {isSavingYara && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+            </Button>
           </CardContent>
         </Card>
       </TabsContent>
@@ -102,7 +135,10 @@ export default function RulesPage() {
                  />
                </div>
             </div>
-             <Button>Save & Deploy Config</Button>
+             <Button onClick={handleSaveSysmon} disabled={isSavingSysmon}>
+                {isSavingSysmon && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save & Deploy Config
+            </Button>
             <Separator />
             <AiRuleCreator currentConfig={sysmonContent} onRuleAppend={setSysmonContent} />
           </CardContent>
