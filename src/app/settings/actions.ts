@@ -3,7 +3,7 @@
 import fs from "fs/promises";
 import path from "path";
 
-export async function saveSettings(settings: { virusTotalApiKey: string }) {
+export async function saveSettings(settings: { virusTotalApiKey: string, genkitModel: string }) {
   const envPath = path.resolve(process.cwd(), ".env");
 
   let envContent = "";
@@ -16,20 +16,20 @@ export async function saveSettings(settings: { virusTotalApiKey: string }) {
     // If the file doesn't exist, we'll create it.
   }
 
-  const lines = envContent.split("\n");
-  let keyFound = false;
+  let lines = envContent.split("\n").filter(line => line.trim() !== "");
+  
+  const settingsMap = new Map<string, string>();
+  settingsMap.set('VIRUSTOTAL_API_KEY', settings.virusTotalApiKey);
+  settingsMap.set('GENKIT_MODEL', settings.genkitModel);
 
-  const newLines = lines.map((line) => {
-    if (line.startsWith("VIRUSTOTAL_API_KEY=")) {
-      keyFound = true;
-      return `VIRUSTOTAL_API_KEY=${settings.virusTotalApiKey}`;
+  settingsMap.forEach((value, key) => {
+    const keyIndex = lines.findIndex(line => line.startsWith(`${key}=`));
+    if (keyIndex > -1) {
+        lines[keyIndex] = `${key}=${value}`;
+    } else {
+        lines.push(`${key}=${value}`);
     }
-    return line;
   });
 
-  if (!keyFound) {
-    newLines.push(`VIRUSTOTAL_API_KEY=${settings.virusTotalApiKey}`);
-  }
-
-  await fs.writeFile(envPath, newLines.join("\n").trim());
+  await fs.writeFile(envPath, lines.join("\n").trim());
 }
