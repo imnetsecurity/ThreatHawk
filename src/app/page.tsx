@@ -97,9 +97,9 @@ export default function DashboardPage() {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,234,567</div>
+              <div className="text-2xl font-bold">0</div>
               <p className="text-xs text-muted-foreground">
-                +15.2% from last 24h
+                No events recorded
               </p>
             </CardContent>
           </Card>
@@ -111,9 +111,9 @@ export default function DashboardPage() {
               <ShieldAlert className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">88</div>
+              <div className="text-2xl font-bold">0</div>
               <p className="text-xs text-muted-foreground">
-                +2 critical alerts in last hour
+                No active alerts
               </p>
             </CardContent>
           </Card>
@@ -125,8 +125,8 @@ export default function DashboardPage() {
               <Cpu className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">4,982 / 5,000</div>
-              <p className="text-xs text-muted-foreground">99.6% uptime</p>
+              <div className="text-2xl font-bold">0 / 0</div>
+              <p className="text-xs text-muted-foreground">No agents reporting</p>
             </CardContent>
           </Card>
         </Link>
