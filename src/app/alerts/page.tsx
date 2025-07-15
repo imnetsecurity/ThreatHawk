@@ -34,7 +34,13 @@ export default function AlertsPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <AlertsTable alerts={alerts} onStatusChange={handleStatusChange} />
+        {alerts.length > 0 ? (
+          <AlertsTable alerts={alerts} onStatusChange={handleStatusChange} />
+        ) : (
+          <div className="flex items-center justify-center h-48 border border-dashed rounded-md">
+            <p className="text-muted-foreground">No alerts found.</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

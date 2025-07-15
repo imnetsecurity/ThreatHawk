@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { ChevronRight, HardDrive, Loader2, Power, PowerOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { executePowerShellCommand } from "./actions";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Terminal } from "lucide-react";
 
 type TerminalLine = {
   type: "command" | "output" | "system" | "error";
@@ -29,7 +31,6 @@ export default function ResponsePage() {
   const [command, setCommand] = React.useState("");
   const [history, setHistory] = React.useState<TerminalLine[]>([
     { type: "system", content: "ThreatHawk PowerShell Gateway v1.0" },
-    { type: "system", content: "Please enter a target agent and click 'Connect'." },
   ]);
   const terminalRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);

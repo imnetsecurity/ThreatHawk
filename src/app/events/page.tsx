@@ -18,7 +18,13 @@ export default function EventsPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <EventTable events={sysmonEvents} />
+        {sysmonEvents.length > 0 ? (
+          <EventTable events={sysmonEvents} />
+        ) : (
+          <div className="flex items-center justify-center h-96 border border-dashed rounded-md">
+            <p className="text-muted-foreground">No events to display.</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

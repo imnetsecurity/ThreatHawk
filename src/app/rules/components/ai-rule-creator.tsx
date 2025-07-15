@@ -59,6 +59,8 @@ export function AiRuleCreator({ currentConfig, onRuleAppend }: { currentConfig: 
     try {
         const updatedConfig = await appendRuleToConfig(currentConfig, generatedRule);
         onRuleAppend(updatedConfig);
+        setGeneratedRule("");
+        setPrompt("");
         toast({
             title: "Rule Appended!",
             description: "The new rule has been added to the configuration editor above."
@@ -109,7 +111,7 @@ export function AiRuleCreator({ currentConfig, onRuleAppend }: { currentConfig: 
             <div className="flex justify-between items-center mb-1">
               <h3 className="font-semibold">Generated Rule (XML)</h3>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={handleCopy}>
+                <Button variant="ghost" size="sm" onClick={handleCopy} disabled={!generatedRule}>
                   {hasCopied ? (
                     <Check className="h-4 w-4 text-green-500" />
                   ) : (
@@ -117,7 +119,7 @@ export function AiRuleCreator({ currentConfig, onRuleAppend }: { currentConfig: 
                   )}
                   <span className="ml-2">{hasCopied ? "Copied!" : "Copy"}</span>
                 </Button>
-                 <Button size="sm" onClick={handleAppend} disabled={isAppending}>
+                 <Button size="sm" onClick={handleAppend} disabled={isAppending || !generatedRule}>
                     {isAppending ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (

@@ -15,6 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableCaption,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -141,41 +142,47 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <ChartContainer config={chartConfig} className="h-[250px] w-full">
-              <BarChart accessibilityLayer data={timelineData}>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="hour"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                  tickFormatter={(value) => `${value}:00`}
-                />
-                <YAxis />
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="dot" />}
-                />
-                <Bar
-                  dataKey="informational"
-                  fill="var(--color-informational)"
-                  radius={4}
-                  stackId="a"
-                />
-                <Bar
-                  dataKey="warning"
-                  fill="var(--color-warning)"
-                  radius={4}
-                  stackId="a"
-                />
-                <Bar
-                  dataKey="critical"
-                  fill="var(--color-critical)"
-                  radius={4}
-                  stackId="a"
-                />
-              </BarChart>
-            </ChartContainer>
+            {timelineData.length > 0 ? (
+                <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                <BarChart accessibilityLayer data={timelineData}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                    dataKey="hour"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    tickFormatter={(value) => `${value}:00`}
+                    />
+                    <YAxis />
+                    <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dot" />}
+                    />
+                    <Bar
+                    dataKey="informational"
+                    fill="var(--color-informational)"
+                    radius={4}
+                    stackId="a"
+                    />
+                    <Bar
+                    dataKey="warning"
+                    fill="var(--color-warning)"
+                    radius={4}
+                    stackId="a"
+                    />
+                    <Bar
+                    dataKey="critical"
+                    fill="var(--color-critical)"
+                    radius={4}
+                    stackId="a"
+                    />
+                </BarChart>
+                </ChartContainer>
+            ) : (
+                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                    No timeline data available.
+                </div>
+            )}
           </CardContent>
         </Card>
 
@@ -188,6 +195,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <Table>
+              {recentAlerts.length === 0 && <TableCaption>No recent high-severity alerts.</TableCaption>}
               <TableHeader>
                 <TableRow>
                   <TableHead>Severity</TableHead>
