@@ -1,3 +1,193 @@
-export default function Home() {
-  return <></>;
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
+  BarChart,
+  Bell,
+  Cpu,
+  FileText,
+  LineChart,
+  ShieldAlert,
+} from "lucide-react";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import { Bar, CartesianGrid, XAxis, YAxis } from "recharts";
+import { recentAlerts, timelineData } from "@/lib/mock-data";
+import { Alert } from "@/lib/types";
+
+const chartConfig = {
+  informational: {
+    label: "Informational",
+    color: "hsl(var(--chart-1))",
+  },
+  warning: {
+    label: "Warning",
+    color: "hsl(var(--chart-2))",
+  },
+  critical: {
+    label: "Critical",
+    color: "hsl(var(--destructive))",
+  },
+} satisfies ChartConfig;
+
+export default function DashboardPage() {
+  const getBadgeVariant = (
+    severity: "Critical" | "Warning" | "Informational"
+  ) => {
+    switch (severity) {
+      case "Critical":
+        return "destructive";
+      case "Warning":
+        return "secondary";
+      default:
+        return "default";
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Events (Last 24h)
+            </CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">1,234,567</div>
+            <p className="text-xs text-muted-foreground">
+              +15.2% from last 24h
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Alerts</CardTitle>
+            <ShieldAlert className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">88</div>
+            <p className="text-xs text-muted-foreground">
+              +2 critical alerts in last hour
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Agents Online</CardTitle>
+            <Cpu className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">4,982 / 5,000</div>
+            <p className="text-xs text-muted-foreground">99.6% uptime</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="col-span-1 lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Alerts Timeline (Last 12 Hours)</CardTitle>
+            <CardDescription>
+              A summary of alert severities over time.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <ChartContainer config={chartConfig} className="h-[250px] w-full">
+              <BarChart accessibilityLayer data={timelineData}>
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="hour"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  tickFormatter={(value) => `${value}:00`}
+                />
+                <YAxis />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="dot" />}
+                />
+                <Bar
+                  dataKey="informational"
+                  fill="var(--color-informational)"
+                  radius={4}
+                  stackId="a"
+                />
+                <Bar
+                  dataKey="warning"
+                  fill="var(--color-warning)"
+                  radius={4}
+                  stackId="a"
+                />
+                <Bar
+                  dataKey="critical"
+                  fill="var(--color-critical)"
+                  radius={4}
+                  stackId="a"
+                />
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-1 lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Recent High-Severity Alerts</CardTitle>
+            <CardDescription>
+              Critical and warning alerts that require immediate attention.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Severity</TableHead>
+                  <TableHead>Timestamp</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Agent</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentAlerts.map((alert: Alert) => (
+                  <TableRow key={alert.id}>
+                    <TableCell>
+                      <Badge variant={getBadgeVariant(alert.severity)}>
+                        {alert.severity}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{alert.timestamp}</TableCell>
+                    <TableCell className="font-medium">
+                      {alert.description}
+                    </TableCell>
+                    <TableCell>{alert.agentHostname}</TableCell>
+                    <TableCell>{alert.status}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 }
