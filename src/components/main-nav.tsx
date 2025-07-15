@@ -13,6 +13,7 @@ import {
   List,
   FileCode2,
   Terminal,
+  Settings,
 } from "lucide-react";
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { href: "/alerts", label: "Alerts", icon: ShieldAlert },
   { href: "/rules", label: "Rule Management", icon: FileCode2 },
   { href: "/response", label: "Response", icon: Terminal },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function MainNav() {
