@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -88,24 +89,29 @@ export default function SettingsPage() {
         <Separator />
 
         <div className="space-y-4">
-          <Label>AI Provider</Label>
-          <Select
-            value={provider}
-            onValueChange={(value) => setProvider(value as 'google' | 'ollama')}
-            disabled={isLoading}
-          >
-            <SelectTrigger className="w-full sm:w-[350px]">
-              <SelectValue placeholder="Select an AI provider..." />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="google">
-                  Google AI (Cloud)
-                </SelectItem>
-                <SelectItem value="ollama">
-                  Ollama (On-Premise)
-                </SelectItem>
-            </SelectContent>
-          </Select>
+            <div className="space-y-2">
+                <Label>AI Provider</Label>
+                 <p className="text-sm text-muted-foreground">
+                    Select the AI provider for all analysis and generation tasks.
+                  </p>
+                <Select
+                    value={provider}
+                    onValueChange={(value) => setProvider(value as 'google' | 'ollama')}
+                    disabled={isLoading}
+                >
+                    <SelectTrigger className="w-full sm:w-[350px]">
+                    <SelectValue placeholder="Select an AI provider..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="google">
+                        Google AI (Cloud)
+                        </SelectItem>
+                        <SelectItem value="ollama">
+                        Ollama (On-Premise)
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
 
           {provider === 'google' && (
              <div className="space-y-2 pl-4 border-l-2 border-muted">
@@ -169,7 +175,7 @@ export default function SettingsPage() {
 
         </div>
 
-        <Button onClick={handleSave} disabled={isLoading || !apiKey}>
+        <Button onClick={handleSave} disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Save All Settings
         </Button>

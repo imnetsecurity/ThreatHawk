@@ -67,7 +67,7 @@ const initialRuleState: YaraXRuleState = {
       modifiers: { nocase: true, ascii: true, wide: false, fullword: false, private: false, xor: { enabled: false, min: 0, max: 255 }, base64: { enabled: false, alphabet: "" }, base64wide: { enabled: false, alphabet: ""} },
     },
   ],
-  condition: "$hex_string or $text_string",
+  condition: "uint16(0) == 0x5A4D and ($hex_string or $text_string)",
 };
 
 const initialBuilderItems: BuilderItem[] = [
@@ -117,7 +117,7 @@ export default function YaraForgePage() {
     if (ruleState.meta.length > 0) {
         sections.meta += "  meta:\n";
         ruleState.meta.forEach(item => {
-            if (item.key && item.value) {
+            if (item.key && (item.value || item.value === 0 || item.value === false)) {
                 const value = item.type === "string" ? `"${item.value}"` : item.value;
                 sections.meta += `    ${item.key} = ${value}\n`;
             }
@@ -130,7 +130,7 @@ export default function YaraForgePage() {
         ruleState.strings.forEach(s => {
             if (s.identifier && s.value) {
                 let valuePart = "";
-                if (s.type === 'text') valuePart = `"${s.value}"`;
+                if (s.type === 'text') valuePart = `"${s.value.replace(/"/g, '\\"')}"`;
                 else if (s.type === 'hex') valuePart = s.value;
                 else if (s.type === 'regexp') valuePart = `/${s.value}/`;
 
@@ -152,8 +152,11 @@ export default function YaraForgePage() {
     sections.condition += `    ${ruleState.condition}\n`;
 
     builderItems.forEach(item => {
-        if(item.type !== 'header' && sections[item.type]) {
-            rule += `\n${sections[item.type]}`;
+        if(item.type !== 'header') {
+           const sectionContent = sections[item.type].trim();
+           if (sectionContent) {
+             rule += `\n${sections[item.type]}`;
+           }
         }
     })
 
