@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -17,7 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import type { RuleFile } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Scan, Wrench } from "lucide-react";
+import { Loader2, Scan, Wrench, Microscope } from "lucide-react";
 import { YaraScanDialog } from "../events/components/yara-scan-dialog";
 
 export default function RulesPage() {
@@ -84,17 +85,25 @@ export default function RulesPage() {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start gap-2">
               <div>
                 <CardTitle>YARA Rule Management</CardTitle>
                 <CardDescription>
                   Create, edit, and test your library of YARA rules.
                 </CardDescription>
               </div>
-               <Button variant="outline" onClick={() => setIsYaraScanOpen(true)}>
+              <div className="flex gap-2">
+                <Button asChild>
+                    <Link href="/rules/yara-forge">
+                        <Microscope className="mr-2 h-4 w-4" />
+                        Open YARA-X Rule Forge
+                    </Link>
+                </Button>
+                <Button variant="outline" onClick={() => setIsYaraScanOpen(true)}>
                     <Scan className="mr-2 h-4 w-4" />
                     Test a Rule
                 </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
