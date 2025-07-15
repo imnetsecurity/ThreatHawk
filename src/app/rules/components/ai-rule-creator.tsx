@@ -20,6 +20,7 @@ export function AiRuleCreator({ currentConfig, onRuleAppend }: { currentConfig: 
   const [isLoading, setIsLoading] = React.useState(false);
   const [isAppending, setIsAppending] = React.useState(false);
   const [generatedRule, setGeneratedRule] = React.useState("");
+  const [explanation, setExplanation] = React.useState("");
   const [hasCopied, setHasCopied] = React.useState(false);
   const { toast } = useToast();
 
@@ -27,9 +28,11 @@ export function AiRuleCreator({ currentConfig, onRuleAppend }: { currentConfig: 
     if (!prompt) return;
     setIsLoading(true);
     setGeneratedRule("");
+    setExplanation("");
     try {
       const result = await generateRuleFromText(prompt);
       setGeneratedRule(result.ruleXml);
+      setExplanation(result.explanation);
     } catch (error) {
       console.error("Rule generation from text failed:", error);
       toast({
@@ -60,6 +63,7 @@ export function AiRuleCreator({ currentConfig, onRuleAppend }: { currentConfig: 
         const updatedConfig = await appendRuleToConfig(currentConfig, generatedRule);
         onRuleAppend(updatedConfig);
         setGeneratedRule("");
+        setExplanation("");
         setPrompt("");
         toast({
             title: "Rule Appended!",
@@ -107,32 +111,38 @@ export function AiRuleCreator({ currentConfig, onRuleAppend }: { currentConfig: 
         </Button>
 
         {generatedRule && (
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <h3 className="font-semibold">Generated Rule (XML)</h3>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={handleCopy} disabled={!generatedRule}>
-                  {hasCopied ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                  <span className="ml-2">{hasCopied ? "Copied!" : "Copy"}</span>
-                </Button>
-                 <Button size="sm" onClick={handleAppend} disabled={isAppending || !generatedRule}>
-                    {isAppending ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                        <Save className="mr-2 h-4 w-4" />
-                    )}
-                    Save & Append to Config
-                </Button>
-              </div>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold mb-1">AI Explanation</h3>
+              <p className="text-sm text-muted-foreground">{explanation}</p>
             </div>
-            <div className="bg-black/80 p-3 rounded-md max-h-64 overflow-y-auto">
-              <pre className="text-xs text-white whitespace-pre-wrap font-mono">
-                <code>{generatedRule}</code>
-              </pre>
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <h3 className="font-semibold">Generated Rule (XML)</h3>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="sm" onClick={handleCopy} disabled={!generatedRule}>
+                    {hasCopied ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                    <span className="ml-2">{hasCopied ? "Copied!" : "Copy"}</span>
+                  </Button>
+                  <Button size="sm" onClick={handleAppend} disabled={isAppending || !generatedRule}>
+                      {isAppending ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                          <Save className="mr-2 h-4 w-4" />
+                      )}
+                      Save & Append to Config
+                  </Button>
+                </div>
+              </div>
+              <div className="bg-black/80 p-3 rounded-md max-h-64 overflow-y-auto">
+                <pre className="text-xs text-white whitespace-pre-wrap font-mono">
+                  <code>{generatedRule}</code>
+                </pre>
+              </div>
             </div>
           </div>
         )}

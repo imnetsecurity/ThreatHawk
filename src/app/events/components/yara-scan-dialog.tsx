@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -41,17 +42,17 @@ export function YaraScanDialog({
   const [isLoading, setIsLoading] = React.useState(false);
   const [fileHash, setFileHash] = React.useState(initialFileHash);
   const [selectedRuleId, setSelectedRuleId] = React.useState(initialRuleId);
+  const [ruleContent, setRuleContent] = React.useState("");
   const [scanResult, setScanResult] =
     React.useState<PerformYaraScanOutput | null>(null);
   const { toast } = useToast();
 
   const handleScan = async () => {
-    const selectedRule = yaraRules.find((r) => r.id === selectedRuleId);
-    if (!selectedRule) {
+    if (!ruleContent) {
       toast({
         variant: "destructive",
         title: "Scan Error",
-        description: "Please select a YARA rule to scan with.",
+        description: "Please select or provide a YARA rule to scan with.",
       });
       return;
     }
@@ -70,7 +71,7 @@ export function YaraScanDialog({
     try {
       const result = await scanWithYara({
         fileHash,
-        yaraRule: selectedRule.content,
+        yaraRule: ruleContent,
       });
       setScanResult(result);
     } catch (error) {
@@ -84,6 +85,12 @@ export function YaraScanDialog({
       setIsLoading(false);
     }
   };
+  
+  // Effect to update content when a predefined rule is selected
+  React.useEffect(() => {
+    const selectedRule = yaraRules.find((r) => r.id === selectedRuleId);
+    setRuleContent(selectedRule?.content || "");
+  }, [selectedRuleId]);
 
   // Reset state when dialog opens
   React.useEffect(() => {
@@ -92,14 +99,12 @@ export function YaraScanDialog({
       setScanResult(null);
       setSelectedRuleId(initialRuleId);
       setFileHash(initialFileHash);
+      
+      const initialRule = yaraRules.find(r => r.id === initialRuleId);
+      setRuleContent(initialRule?.content || "");
     }
   }, [isOpen, initialRuleId, initialFileHash]);
   
-  const selectedRuleContent = React.useMemo(() => {
-    return yaraRules.find(r => r.id === selectedRuleId)?.content || "Select a rule to see its content.";
-  }, [selectedRuleId]);
-
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-4xl">
@@ -126,7 +131,7 @@ export function YaraScanDialog({
                     />
                 </div>
                  <div className="space-y-2">
-                    <Label htmlFor="yara-rule">YARA Rule File</Label>
+                    <Label htmlFor="yara-rule">Load Rule From File</Label>
                     <Select value={selectedRuleId} onValueChange={setSelectedRuleId} disabled={isLoading}>
                       <SelectTrigger id="yara-rule" className="w-full">
                         <SelectValue placeholder="Select a YARA rule file..." />
@@ -142,7 +147,7 @@ export function YaraScanDialog({
                  </div>
                  <Button
                     onClick={handleScan}
-                    disabled={isLoading || !selectedRuleId || !fileHash}
+                    disabled={isLoading || !ruleContent || !fileHash}
                     className="w-full"
                 >
                     {isLoading ? (
@@ -175,11 +180,13 @@ export function YaraScanDialog({
             </div>
             <div className="space-y-2">
                  <Label>Rule Content</Label>
-                 <div className="bg-black/80 p-3 rounded-md h-[350px] overflow-y-auto">
-                    <pre className="text-xs text-white whitespace-pre-wrap font-mono">
-                        <code>{selectedRuleContent}</code>
-                    </pre>
-                 </div>
+                 <Textarea 
+                    className="h-[350px] font-mono bg-black/80 text-white text-xs"
+                    value={ruleContent}
+                    onChange={(e) => setRuleContent(e.target.value)}
+                    placeholder="Select a rule or paste your own content here to begin."
+                    disabled={isLoading}
+                 />
             </div>
         </div>
 
