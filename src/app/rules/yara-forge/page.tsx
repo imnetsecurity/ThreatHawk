@@ -23,6 +23,7 @@ import {
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -36,7 +37,6 @@ import { HeaderCard } from "./components/header-card";
 import { MetaCard } from "./components/meta-card";
 import { StringsCard } from "./components/strings-card";
 import { ConditionCard } from "./components/condition-card";
-import { SortableRuleCard } from "./components/sortable-rule-card";
 import { KeywordBrowser } from "./components/keyword-browser";
 import { AiGenerator } from "./components/ai-generator";
 import { CliBuilder } from "./components/cli-builder";
