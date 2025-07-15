@@ -63,6 +63,21 @@ export default function DashboardPage() {
     }
   };
 
+  const getStatusBadgeVariant = (
+    status: "New" | "Acknowledged" | "Escalated" | "Closed"
+  ) => {
+    switch (status) {
+      case "New":
+        return "destructive";
+      case "Acknowledged":
+        return "default";
+      case "Escalated":
+        return "secondary";
+      case "Closed":
+        return "outline";
+    }
+  };
+
   return (
     <div className="flex flex-col gap-8">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -182,7 +197,11 @@ export default function DashboardPage() {
                       {alert.description}
                     </TableCell>
                     <TableCell>{alert.agentHostname}</TableCell>
-                    <TableCell>{alert.status}</TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusBadgeVariant(alert.status)}>
+                        {alert.status}
+                      </Badge>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
