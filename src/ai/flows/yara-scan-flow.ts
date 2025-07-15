@@ -27,32 +27,6 @@ export type PerformYaraScanOutput = z.infer<typeof PerformYaraScanOutputSchema>;
 
 
 export async function performYaraScan(input: PerformYaraScanInput): Promise<PerformYaraScanOutput> {
-  const prompt = ai.definePrompt({
-      name: 'performYaraScanPrompt',
-      input: { schema: PerformYaraScanInputSchema },
-      output: { schema: PerformYaraScanOutputSchema },
-      prompt: `You are a YARA scan engine simulator. You will receive a file hash and a YARA rule.
-      
-      Your task is to determine if the provided YARA rule would likely match a file with the given hash.
-      
-      Analyze the YARA rule provided:
-      Rule:
-      \`\`\`yara
-      {{yaraRule}}
-      \`\`\`
-  
-      Analyze the file hash provided: {{fileHash}}
-  
-      Based on the rule's name, strings, and conditions, decide if it's plausible that this rule would match.
-      For example, if the rule name is "APT29_Dukebot" and the hash is a known APT29 hash, you should report a match. If the rule looks for "mimikatz" strings and the hash is a known Mimikatz hash, you should report a match. If there is no logical connection, report no match.
-  
-      If you determine a match, set didMatch to true, and provide the name of the rule that matched and some plausible details for the match.
-      If there is no match, set didMatch to false.
-  
-      Return the output as a valid JSON object.
-      `,
-  });
-
   const performYaraScanFlow = ai.defineFlow(
     {
       name: 'performYaraScanFlow',
@@ -60,6 +34,32 @@ export async function performYaraScan(input: PerformYaraScanInput): Promise<Perf
       outputSchema: PerformYaraScanOutputSchema,
     },
     async (flowInput) => {
+      const prompt = ai.definePrompt({
+          name: 'performYaraScanPrompt',
+          input: { schema: PerformYaraScanInputSchema },
+          output: { schema: PerformYaraScanOutputSchema },
+          prompt: `You are a YARA scan engine simulator. You will receive a file hash and a YARA rule.
+          
+          Your task is to determine if the provided YARA rule would likely match a file with the given hash.
+          
+          Analyze the YARA rule provided:
+          Rule:
+          \`\`\`yara
+          {{yaraRule}}
+          \`\`\`
+      
+          Analyze the file hash provided: {{fileHash}}
+      
+          Based on the rule's name, strings, and conditions, decide if it's plausible that this rule would match.
+          For example, if the rule name is "APT29_Dukebot" and the hash is a known APT29 hash, you should report a match. If the rule looks for "mimikatz" strings and the hash is a known Mimikatz hash, you should report a match. If there is no logical connection, report no match.
+      
+          If you determine a match, set didMatch to true, and provide the name of the rule that matched and some plausible details for the match.
+          If there is no match, set didMatch to false.
+      
+          Return the output as a valid JSON object.
+          `,
+      });
+      
       const {output} = await prompt(flowInput);
       return output!;
     }
