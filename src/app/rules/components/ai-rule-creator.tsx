@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Sparkles, Copy, Check } from "lucide-react";
-import { generateRuleFromText } from "../actions";
+import { Loader2, Sparkles, Copy, Check, Save } from "lucide-react";
+import { generateRuleFromText, appendRuleToConfig } from "../actions";
 import { useToast } from "@/hooks/use-toast";
 
-export function AiRuleCreator() {
+export function AiRuleCreator({ currentConfig, onRuleAppend }: { currentConfig: string, onRuleAppend: (newConfig: string) => void}) {
   const [prompt, setPrompt] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isAppending, setIsAppending] = React.useState(false);
   const [generatedRule, setGeneratedRule] = React.useState("");
   const [hasCopied, setHasCopied] = React.useState(false);
   const { toast } = useToast();
@@ -52,6 +53,28 @@ export function AiRuleCreator() {
     setTimeout(() => setHasCopied(false), 2000);
   };
 
+  const handleAppend = async () => {
+    if (!generatedRule) return;
+    setIsAppending(true);
+    try {
+        const updatedConfig = await appendRuleToConfig(currentConfig, generatedRule);
+        onRuleAppend(updatedConfig);
+        toast({
+            title: "Rule Appended!",
+            description: "The new rule has been added to the configuration editor above."
+        });
+    } catch (error: any) {
+        console.error("Failed to append rule:", error);
+        toast({
+            variant: "destructive",
+            title: "Append Failed",
+            description: error.message || "Could not append the rule to the configuration."
+        });
+    } finally {
+        setIsAppending(false);
+    }
+  }
+
 
   return (
     <Card className="bg-secondary/50">
@@ -85,14 +108,24 @@ export function AiRuleCreator() {
           <div>
             <div className="flex justify-between items-center mb-1">
               <h3 className="font-semibold">Generated Rule (XML)</h3>
-              <Button variant="ghost" size="sm" onClick={handleCopy}>
-                {hasCopied ? (
-                  <Check className="h-4 w-4 text-green-500" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-                <span className="ml-2">{hasCopied ? "Copied!" : "Copy"}</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={handleCopy}>
+                  {hasCopied ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                  <span className="ml-2">{hasCopied ? "Copied!" : "Copy"}</span>
+                </Button>
+                 <Button size="sm" onClick={handleAppend} disabled={isAppending}>
+                    {isAppending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <Save className="mr-2 h-4 w-4" />
+                    )}
+                    Save & Append to Config
+                </Button>
+              </div>
             </div>
             <div className="bg-black/80 p-3 rounded-md max-h-64 overflow-y-auto">
               <pre className="text-xs text-white whitespace-pre-wrap font-mono">

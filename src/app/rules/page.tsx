@@ -21,19 +21,29 @@ import { FileTree } from "./components/file-tree";
 import { AiRuleCreator } from "./components/ai-rule-creator";
 import { Separator } from "@/components/ui/separator";
 import type { RuleFile } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 
 export default function RulesPage() {
   const [selectedYaraRule, setSelectedYaraRule] = React.useState<RuleFile>(yaraRules[0]);
+  const [yaraContent, setYaraContent] = React.useState(yaraRules[0].content);
+  
   const [selectedSysmonRule, setSelectedSysmonRule] = React.useState<RuleFile>(sysmonRules[0]);
+  const [sysmonContent, setSysmonContent] = React.useState(sysmonRules[0].content);
 
   const handleSelectYara = (fileId: string) => {
     const file = yaraRules.find(r => r.id === fileId);
-    if (file) setSelectedYaraRule(file);
+    if (file) {
+      setSelectedYaraRule(file);
+      setYaraContent(file.content);
+    }
   }
 
   const handleSelectSysmon = (fileId: string) => {
     const file = sysmonRules.find(r => r.id === fileId);
-    if (file) setSelectedSysmonRule(file);
+    if (file) {
+      setSelectedSysmonRule(file);
+      setSysmonContent(file.content);
+    }
   }
 
   return (
@@ -51,17 +61,21 @@ export default function RulesPage() {
               scanning.
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-1">
-              <FileTree title="YARA Files" files={yaraRules} selectedFile={selectedYaraRule.id} onSelectFile={handleSelectYara} />
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-1">
+                <FileTree title="YARA Files" files={yaraRules} selectedFile={selectedYaraRule.id} onSelectFile={handleSelectYara} />
+              </div>
+              <div className="md:col-span-2">
+                <Textarea
+                  key={selectedYaraRule.id}
+                  className="h-[600px] font-mono"
+                  value={yaraContent}
+                  onChange={(e) => setYaraContent(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="md:col-span-2">
-              <Textarea
-                key={selectedYaraRule.id}
-                className="h-[600px] font-mono"
-                defaultValue={selectedYaraRule.content}
-              />
-            </div>
+             <Button>Save Changes</Button>
           </CardContent>
         </Card>
       </TabsContent>
@@ -83,12 +97,14 @@ export default function RulesPage() {
                  <Textarea
                    key={selectedSysmonRule.id}
                    className="h-[600px] font-mono"
-                   defaultValue={selectedSysmonRule.content}
+                   value={sysmonContent}
+                   onChange={(e) => setSysmonContent(e.target.value)}
                  />
                </div>
             </div>
+             <Button>Save & Deploy Config</Button>
             <Separator />
-            <AiRuleCreator />
+            <AiRuleCreator currentConfig={sysmonContent} onRuleAppend={setSysmonContent} />
           </CardContent>
         </Card>
       </TabsContent>
