@@ -12,11 +12,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Bot, X, Loader2, FileWarning, Terminal, ShieldCheck } from "lucide-react";
+import { Bot, X, Loader2, FileWarning, Terminal, ShieldCheck, Scan } from "lucide-react";
 import type { SysmonEvent } from "@/lib/types";
 import { analyzeEventForAnomalies } from "../actions";
 import type { DetectBehavioralAnomalyOutput } from "@/ai/flows/behavioral-anomaly-detection";
 import { RuleGenerationDialog } from "./rule-generation-dialog";
+import { YaraScanDialog } from "./yara-scan-dialog";
 import { Badge } from "@/components/ui/badge";
 
 export function AnomalyPanel({
@@ -30,6 +31,7 @@ export function AnomalyPanel({
   const [analysisResult, setAnalysisResult] =
     React.useState<DetectBehavioralAnomalyOutput | null>(null);
   const [isRuleDialogOpen, setIsRuleDialogOpen] = React.useState(false);
+  const [isYaraDialogOpen, setIsYaraDialogOpen] = React.useState(false);
 
   React.useEffect(() => {
     // Reset analysis when a new event is selected
@@ -59,6 +61,7 @@ export function AnomalyPanel({
     );
   }
 
+  const hasFileHash = !!event.process.hash;
   const hasVirusTotalScore =
     analysisResult?.virusTotalScore && analysisResult.virusTotalScore !== "0/0";
 
@@ -107,10 +110,43 @@ export function AnomalyPanel({
             )}
           </div>
           <Separator />
+          <div>
+            <h3 className="font-semibold mb-2">Actions</h3>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleAnalyze}
+                disabled={isLoading || !hasFileHash}
+                className="flex-1"
+                title={!hasFileHash ? "Event must have a file hash for analysis" : "Analyze for anomalies"}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Bot className="mr-2 h-4 w-4" />
+                    AI Analysis
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                disabled={!hasFileHash}
+                onClick={() => setIsYaraDialogOpen(true)}
+                title={!hasFileHash ? "Event must have a file hash to scan" : "Initiate YARA Scan"}
+              >
+                <Scan className="mr-2 h-4 w-4" />
+                YARA Scan
+              </Button>
+            </div>
+          </div>
           {analysisResult && (
             <div>
+              <Separator className="my-4"/>
               <h3 className="font-semibold mb-2 flex items-center gap-2">
-                <Bot className="h-5 w-5 text-primary" /> AI Analysis
+                <Bot className="h-5 w-5 text-primary" /> AI Analysis Result
               </h3>
               {hasVirusTotalScore && (
                 <div className="mb-4">
@@ -160,24 +196,7 @@ export function AnomalyPanel({
           )}
         </CardContent>
         <CardFooter>
-          <Button
-            onClick={handleAnalyze}
-            disabled={isLoading || !event.process.hash}
-            className="w-full"
-            title={!event.process.hash ? "Event must have a file hash for analysis" : "Analyze for anomalies"}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
-              </>
-            ) : (
-              <>
-                <Bot className="mr-2 h-4 w-4" />
-                Analyze for Anomalies
-              </>
-            )}
-          </Button>
+            {/* Footer can be used for other actions later */}
         </CardFooter>
       </Card>
       {analysisResult && event && (
@@ -186,6 +205,14 @@ export function AnomalyPanel({
           setIsOpen={setIsRuleDialogOpen}
           anomalyDescription={analysisResult.explanation}
           event={event}
+        />
+      )}
+       {event && hasFileHash && (
+        <YaraScanDialog
+          isOpen={isYaraDialogOpen}
+          setIsOpen={setIsYaraDialogOpen}
+          fileHash={event.process.hash!}
+          agentHostname={event.agent.hostname}
         />
       )}
     </>

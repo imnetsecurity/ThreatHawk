@@ -55,3 +55,9 @@ export type RuleFile = {
   name: string;
   content: string;
 };
+
+export type YaraScanResult = {
+  didMatch: boolean;
+  ruleName?: string;
+  details?: string;
+};
