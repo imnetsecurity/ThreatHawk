@@ -50,17 +50,7 @@ const getStatusBadgeVariant = (
 };
 
 
-export function AlertsTable({ initialAlerts }: { initialAlerts: Alert[] }) {
-  const [alerts, setAlerts] = React.useState<Alert[]>(initialAlerts);
-
-  const handleStatusChange = (alertId: string, newStatus: Alert["status"]) => {
-    setAlerts(
-      alerts.map((alert) =>
-        alert.id === alertId ? { ...alert, status: newStatus } : alert
-      )
-    );
-  };
-
+export function AlertsTable({ alerts, onStatusChange }: { alerts: Alert[], onStatusChange: (alertId: string, newStatus: Alert["status"]) => void }) {
   const getRowClass = (severity: Alert['severity']) => {
     switch (severity) {
       case 'Critical':
@@ -113,17 +103,17 @@ export function AlertsTable({ initialAlerts }: { initialAlerts: Alert[] }) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
-                      onClick={() => handleStatusChange(alert.id, "Acknowledged")}
+                      onClick={() => onStatusChange(alert.id, "Acknowledged")}
                     >
                       Acknowledge
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => handleStatusChange(alert.id, "Escalated")}
+                      onClick={() => onStatusChange(alert.id, "Escalated")}
                     >
                       Escalate
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => handleStatusChange(alert.id, "Closed")}
+                      onClick={() => onStatusChange(alert.id, "Closed")}
                     >
                       Close as False Positive
                     </DropdownMenuItem>

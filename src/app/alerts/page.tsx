@@ -1,3 +1,6 @@
+"use client";
+
+import * as React from "react";
 import {
   Card,
   CardContent,
@@ -7,8 +10,20 @@ import {
 } from "@/components/ui/card";
 import { recentAlerts } from "@/lib/mock-data";
 import { AlertsTable } from "./components/alerts-table";
+import type { Alert } from "@/lib/types";
+
 
 export default function AlertsPage() {
+  const [alerts, setAlerts] = React.useState<Alert[]>(recentAlerts);
+
+  const handleStatusChange = (alertId: string, newStatus: Alert["status"]) => {
+    setAlerts(
+      alerts.map((alert) =>
+        alert.id === alertId ? { ...alert, status: newStatus } : alert
+      )
+    );
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -19,7 +34,7 @@ export default function AlertsPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <AlertsTable initialAlerts={recentAlerts} />
+        <AlertsTable alerts={alerts} onStatusChange={handleStatusChange} />
       </CardContent>
     </Card>
   );
