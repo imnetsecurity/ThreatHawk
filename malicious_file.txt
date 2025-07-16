@@ -1,0 +1,2 @@
+This is a test file that the agent will quarantine.
+It simulates a malicious file found on the system.

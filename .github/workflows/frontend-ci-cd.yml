@@ -1,0 +1,34 @@
+# .github/workflows/frontend-ci-cd.yml
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Production Application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://threathawk.example.com
+          VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+
+      - name: Placeholder for Deploy
+        run: |
+          echo "Build successful. The '.next' directory is ready for deployment."
+          echo "In a real workflow, this step would deploy to Vercel, AWS, etc."

@@ -6,9 +6,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { EventTable } from "./components/event-table";
-import { sysmonEvents } from "@/lib/mock-data";
+import { SysmonEvent } from "@/lib/types";
 
-export default function EventsPage() {
+export const dynamic = 'force-dynamic';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+async function getEvents(): Promise<SysmonEvent[]> {
+  const res = await fetch(`${API_URL}/api/events`, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to fetch event data');
+  return res.json();
+}
+
+export default async function EventsPage() {
+  const events = await getEvents();
   return (
     <Card>
       <CardHeader>
@@ -18,8 +28,8 @@ export default function EventsPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {sysmonEvents.length > 0 ? (
-          <EventTable events={sysmonEvents} />
+        {events.length > 0 ? (
+          <EventTable events={events} />
         ) : (
           <div className="flex items-center justify-center h-96 border border-dashed rounded-md">
             <p className="text-muted-foreground">No events to display.</p>

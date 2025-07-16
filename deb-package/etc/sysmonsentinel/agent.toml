@@ -1,0 +1,13 @@
+# Configuration for the Sysmon Sentinel Agent
+
+# A unique identifier for this agent.
+agent_id = "agent-007"
+
+[server]
+url = "https://localhost:3000"
+
+[security]
+# Paths are now absolute, reflecting the installed locations.
+server_cert_path = "/etc/sysmonsentinel/server-cert.pem"
+agent_cert_path = "/etc/sysmonsentinel/agent-cert.pem"
+agent_key_path = "/etc/sysmonsentinel/agent-key.pem"

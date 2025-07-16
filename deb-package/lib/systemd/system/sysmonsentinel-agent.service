@@ -1,0 +1,12 @@
+[Unit]
+Description=Sysmon Sentinel Agent
+After=network.target auditd.service
+
+[Service]
+ExecStart=/usr/local/bin/agent
+WorkingDirectory=/etc/sysmonsentinel
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target

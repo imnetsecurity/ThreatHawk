@@ -1,0 +1,9 @@
+Package: sysmonsentinel-agent
+Version: 0.1.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: Your Name <you@example.com>
+Description: Sysmon Sentinel Agent
+ A lightweight EDR agent for collecting and responding to system events.
+Depends: auditd

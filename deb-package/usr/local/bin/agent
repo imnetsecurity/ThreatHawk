@@ -1,0 +1,4 @@
+#!/bin/bash
+# Placeholder for the actual agent binary
+echo "Sysmon Sentinel Agent (placeholder)"
+exit 0

@@ -1,6 +1,3 @@
-"use client";
-
-import * as React from "react";
 import {
   Card,
   CardContent,
@@ -8,22 +5,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { recentAlerts } from "@/lib/mock-data";
 import { AlertsTable } from "./components/alerts-table";
 import type { Alert } from "@/lib/types";
 
+export const dynamic = 'force-dynamic';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function AlertsPage() {
-  const [alerts, setAlerts] = React.useState<Alert[]>(recentAlerts);
+async function getAlerts(): Promise<Alert[]> {
+  const res = await fetch(`${API_URL}/api/alerts`, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to fetch alert data');
+  return res.json();
+}
 
-  const handleStatusChange = (alertId: string, newStatus: Alert["status"]) => {
-    setAlerts(
-      alerts.map((alert) =>
-        alert.id === alertId ? { ...alert, status: newStatus } : alert
-      )
-    );
-  };
-
+export default async function AlertsPage() {
+  const alerts = await getAlerts();
   return (
     <Card>
       <CardHeader>
@@ -35,7 +30,7 @@ export default function AlertsPage() {
       </CardHeader>
       <CardContent>
         {alerts.length > 0 ? (
-          <AlertsTable alerts={alerts} onStatusChange={handleStatusChange} />
+          <AlertsTable initialAlerts={alerts} />
         ) : (
           <div className="flex items-center justify-center h-48 border border-dashed rounded-md">
             <p className="text-muted-foreground">No alerts found.</p>

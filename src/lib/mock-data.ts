@@ -1,15 +1,39 @@
-import { Alert, SysmonEvent, TimelineDataPoint, RuleFile } from "./types";
+import { Alert, SysmonEvent, TimelineDataPoint, RuleFile, AppSettings } from "./types";
 
-export const recentAlerts: Alert[] = [];
+export const recentAlerts: Alert[] = [
+  // ...
+];
 
-export const timelineData: TimelineDataPoint[] = [];
+export const timelineData: TimelineDataPoint[] = [
+  // ...
+];
 
 export const sysmonEvents: SysmonEvent[] = [];
 
 export const yaraRules: RuleFile[] = [
-  { id: "yr-1", name: "new_rule.yar", content: "rule new_rule\n{\n  condition:\n    false\n}" },
+  // ...
 ];
 
 export const sysmonRules: RuleFile[] = [
-  { id: "sr-1", name: "new_config.xml", content: "<Sysmon schemaversion=\"4.90\">\n  <EventFiltering>\n    <RuleGroup name=\"New Rules\" groupRelation=\"or\">\n      <!-- Add new rules here -->\n    </RuleGroup>\n  </EventFiltering>\n</Sysmon>" },
+  // ...
 ];
+
+export const appSettings: AppSettings = {
+  general: { appName: "ThreatHawk", darkMode: true, eventRetentionDays: 90 },
+  integrations: {
+    // The API key is now removed from the source code.
+    // It will be loaded from environment variables in a real implementation.
+    virustotalApiKey: "", 
+    splunkUrl: "https://mock-splunk.example.com"
+  },
+  notifications: {
+    emailEnabled: true,
+    emailAddress: "admin@example.com",
+    slackWebhookUrl: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+  },
+  agentManagement: {
+    agentUpdateChannel: "stable",
+    maxAgentCpuUsage: 75,
+    maxAgentMemoryUsage: 200
+  },
+};
